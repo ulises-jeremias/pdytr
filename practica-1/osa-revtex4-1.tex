@@ -1,0 +1,71 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         File: osa-revtex4-1.tex                             %
+%                        Date: April 15, 2013                                 %
+%                                                                             %
+%                              BETA VERSION!                                  %
+%                   JOSA A, JOSA B, Applied Optics, Optics Letters            %
+%                                                                             %
+%            This file requires the substyle file osajnl4-1.rtx,              %
+%                   running under REVTeX 4.1 and LaTeX 2e                     %
+%                                                                             %
+%                   USE THE FOLLOWING REVTeX 4-1 OPTIONS:                     %
+% \documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1}%
+%                    %% Use 11pt for Applied Optics                           %
+%                                                                             %
+%               (c) 2013 The Optical Society of America                       %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1} %% use 11pt for Applied Optics
+%\documentclass[osajnl,preprint,showpacs,superscriptaddress,11pt]{revtex4-1} %% use 12pt for preprint option
+\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz}
+\usepackage[utf8]{inputenc}
+\graphicspath{{images/}}
+
+\usepackage{mathtools,enumitem}
+
+\begin{document}
+
+\title{Programación Distribuida y Tiempo Real}
+
+\author{Ulises Jeremias Cornejo Fandos}
+\affiliation{Licenciatura en Informática, Facultad de Informática, UNLP}
+
+\maketitle %% required
+
+\section{Identifique similitudes y diferencias entre los sockets en C y en Java}
+
+Para la creación y utilización de sockets en C se utiliza la librería estandar \textit{sys/socket.h}, mientras que en Java se utiliza la librería \textit{java.net} para la creación de los mismos y algunos módulos provenientes de la librería \textit{java.io} para interactuar con los mismos a modo de lectura y escritura. \\
+
+Una diferencia muy marcada es el enfoque de implementación de los Sockets en ambos lenguajes. Por un lado tenemos el enfoque de Java, que cuenta con una clase \textit{java.net.Socket}. La misma permite establecer una comunicación bidireccional entre dos procesos en una red dada (el programa que define el socket y otro en la red). Además, se cuenta con la clase \textit{java.net.ServerSocket} para definir más directamente sockets que estén escuchando y aceptando conexiones desde procesos clientes.
+
+Por otro lado, en C no se encuentra tal distinción. El modelo Cliente-Servidor puede ser implementado pero la librería no cuenta con funciones pensadas explicitamente para la realización de esta tarea. La librería \textit{sys/socket.h} expone la función \textbf{\textit{socket}} la cual permite crear un socket.
+
+\section{Tanto en C como en Java (directorios csock-javasock):}
+
+\subsection{¿Por qué puede decirse que los ejemplos no son representativos del modelo c/s?}
+
+\subsection{Muestre que no necesariamente siempre se leen/escriben todos los datos involucrados en las comunicaciones con una llamada read/write con sockets. Sugerencia: puede modificar los programas (C o Java o ambos) para que la cantidad de datos que se comunican sea de $10^3$ , $10^4$ , $10^5$ y $10^6$ bytes y contengan bytes asignados directamente en el programa (pueden no leer de teclado ni mostrar en pantalla cada uno de los datos del buffer), explicando el resultado en cada caso. Importante: notar el uso de “attempts” en “...attempts to read up to count bytes from file descriptor fd...” así como el valor de retorno de la función read (del man read).}
+
+\subsection{Agregue a la modificación anterior una verificación de llegada correcta de los datos que se envían (cantidad y contenido del buffer), de forma tal que se asegure que todos los datos enviados llegan correctamente, independientemente de la cantidad de datos involucrados.}
+
+\subsection{Grafique el promedio y la desviación estándar de los tiempos de comunicaciones de cada comunicación. Explique el experimento realizado para calcular el tiempo de comunicaciones.}
+
+\section{¿Por qué en C se puede usar la misma variable tanto para leer de teclado como para enviar por un socket? ¿Esto sería relevante para las aplicaciones c/s?}
+
+\section{¿Podría implementar un servidor de archivos remotos utilizando sockets? Describa brevemente la interfaz y los detalles que considere más importantes del diseño. No es necesario implementar.}
+
+\section{Defina qué es un servidor con estado (stateful server) y qué es un servidor sin estado (stateless server).}
+
+\begin{itemize}
+    \item \textbf{Stateful Server}
+    
+    Un servidor con estado es aquel que mantiene el estado de la información del usuario en forma de sesiones. Este tipo de servidores recuerda los datos del cliente (estado) de una solicitud a la siguiente. Servidores con estado, almacenar estado de sesión. Por lo tanto, pueden realizar un seguimiento de qué clientes han abierto qué archivos, punteros de lectura y escritura actuales para archivos, qué archivos han sido bloqueados por qué clientes, etc.
+    
+    \item \textbf{Stateless Server}
+    
+    A diferencia de un servidor con estado, el servidor sin estado es aquel que no mantiene ningún estado de la información para el usuario. En este tipo de servidores, cada consulta es completamente independiente a la anterior. \\
+    Sin embargo, los servidores sin estado pueden identificar al usuario si la solicitud al servicio incluye una identificación de usuario única que se asignó anteriormente al mismo. Ese identificador (ID) del usuario deberá pasarse en cada consulta, a diferencia del caso de los servidores con estado que mantienen este ID de usuario en la sesión y los datos de la solicitud no necesariamente deben contener este ID.
+\end{itemize}
+
+\end{document}
