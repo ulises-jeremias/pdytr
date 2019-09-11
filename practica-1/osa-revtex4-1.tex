@@ -18,7 +18,7 @@
 
 \documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1} %% use 11pt for Applied Optics
 %\documentclass[osajnl,preprint,showpacs,superscriptaddress,11pt]{revtex4-1} %% use 12pt for preprint option
-\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz}
+\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz,minted}
 \usepackage[utf8]{inputenc}
 \graphicspath{{images/}}
 
@@ -45,6 +45,10 @@ Por otro lado, en C no se encuentra tal distinción. El modelo Cliente-Servidor 
 
 \subsection{¿Por qué puede decirse que los ejemplos no son representativos del modelo c/s?}
 
+En el modeilo cliente/servidor (c/s), el servidor está  la espera continua de algún pedido de conexión por parte de algún cliente. Luego, el esquema general de trabajo en un modelo c/s dado el pedido de conexión es el siguiente: inicialización (o handshape), transferencia de datos, y finalización.
+
+En este caso, el servidor cierra la conexión dada la primer request y envio de respuesta. No se respetan los pasos de conexión anteriormente mencionados, pues en el ejemplo solo se realiza la transferencia de datos, sin envio de handshape o envío de mensajes de cierre de conexión.
+
 \subsection{Muestre que no necesariamente siempre se leen/escriben todos los datos involucrados en las comunicaciones con una llamada read/write con sockets. Sugerencia: puede modificar los programas (C o Java o ambos) para que la cantidad de datos que se comunican sea de $10^3$ , $10^4$ , $10^5$ y $10^6$ bytes y contengan bytes asignados directamente en el programa (pueden no leer de teclado ni mostrar en pantalla cada uno de los datos del buffer), explicando el resultado en cada caso. Importante: notar el uso de “attempts” en “...attempts to read up to count bytes from file descriptor fd...” así como el valor de retorno de la función read (del man read).}
 
 \subsection{Agregue a la modificación anterior una verificación de llegada correcta de los datos que se envían (cantidad y contenido del buffer), de forma tal que se asegure que todos los datos enviados llegan correctamente, independientemente de la cantidad de datos involucrados.}
@@ -53,7 +57,78 @@ Por otro lado, en C no se encuentra tal distinción. El modelo Cliente-Servidor 
 
 \section{¿Por qué en C se puede usar la misma variable tanto para leer de teclado como para enviar por un socket? ¿Esto sería relevante para las aplicaciones c/s?}
 
+El header o prototipo de la función \textit{write} en C está dado por la siguiente expresión:
+
+\begin{minted}{C}
+size_t write();   
+\end{minted}
+
 \section{¿Podría implementar un servidor de archivos remotos utilizando sockets? Describa brevemente la interfaz y los detalles que considere más importantes del diseño. No es necesario implementar.}
+
+Para plantear una implementación de servidor de archivos remotos utilizando sockets puedo basar mi solución en dos protocolos existente que definen una interfaz para este tipo de implementaciones, \textbf{FTP} y \textbf{TFTP}.
+
+\begin{itemize}
+    \item \textbf{FTP}
+    
+    Una implementación de FTP puede realizarse utilizando dos sockets de tipo TCP para el servidor. Los mismos pueden escuchar en los puertos estandar, 20 y 21, para datos y control respectivamente.
+    
+    Se cuenta con funciones específicas, entre otras las cuales se ejecuten sobre el \textit{filesystem} del servidor remoto FTP.
+    
+    \item \textbf{TFTP}
+    
+    Por otro lado, una implementación de TFTP se implementa como un servidor que utiliza unicamente un socket de tipo UDP. El conjunto de instrucciones soportadas por el mismo serán menores a las soportadas por un servidor FTP.
+\end{itemize}
+
+Para la implementación propia de un servidor de archivos remotos opto por una alternativa similar a la que se plantea sobre un servidor FTP. Para realizar un servidor de este estilo se debe implementar una conexión TCP, es decir, un inicio y cierre de conexión de 3 vías o \textit{3-ways-handshape}. \\
+
+\textit{Las instrucciones soportadas por el servidor implementado podrían ser las siguiente:}
+
+\begin{itemize}
+    \item \textbf{ls}
+    
+    Crea una lista de todos los archivos que se encuentran en el directorio actual.
+    
+    El cliente envía el comando \textit{ls} y luego, el servidor contesta con la lista de archivos que posee. Se debe verificar el tamaño de los datos enviados desde el servidor para asegurarse que lleguen todos.
+
+    
+    \item \textbf{pwd}
+    
+    Muestra el path absoluto del directorio actual.
+    
+    El cliente envia el comando \textit{pwd} y el servidor responde con el path absoluto del duirectorio actual de trabajo.
+    
+    \item \textbf{cd}
+    
+    El comando significa change directory (cambiar el directorio) y se usa para pasar a un directorio diferente. El comando \textbf{cd} sin argumentos se utiliza para tener acceso al directorio principal.
+    
+    El cliente envia el comando \textit{cd} con o sin argumentos y el servidor actualiza internamente el directorio de trabajo.
+    
+    \item \textbf{mkdir}
+    
+    El comando mkdir se utiliza para crear un directorio dentro del directorio actual. El uso de este comando se reserva para los usuarios que tengan acceso permitido.
+
+    \item \textbf{get}
+    
+    Este comando permite recuperar un archivo que se encuentra en el servidor.
+    
+    El cliente envia el comando \textit{get}. Si el comando aparece seguido del nombre de un archivo, el archivo remoto se transfiere a la máquina local, dentro del directorio local actual. Si aparece seguido de dos nombres de archivos, el archivo remoto (el primer nombre) se transfiere a la máquina local en el directorio local actual con el nombre del archivo especificado (el segundo nombre). Si el nombre del archivo contiene espacios, será necesario introducido entre comillas.
+    
+    El servidor comprueba la existencia del archivo. Dada su existencia, se abre el archivo y comprueba su tamaño. Luego, genera un \textit{checksum} del archivo. Por último, envía el archivo y el \textit{checksum} por el socket para comprar si se recibió correctamente.
+    
+    \item \textbf{put}
+    
+    Este comando se utiliza para enviar un archivo local al servidor.
+    
+    Si el comando aparece seguido del nombre de un archivo, el archivo local se transfiere al servidor en el directorio remoto actual. Si el comando aparece seguido de dos nombres de archivos, el archivo local (el primer nombre) se transfiere al servidor en el directorio remoto actual, con el nombre del archivo especificado (el segundo nombre). Si el nombre del archivo contiene espacios, será necesario introducido entre comillas.
+    
+    Finalmente, con el objetivo de verificar que el archivo sea enviado correctamente, se comprueba el tamaño del archivo y se lo envía al servidor. Para realizar la comprobación, se envía un \textit{checksum}, el cual el servidor debe contrastar contra un \textit{checksum} del archivo que le llegó.
+
+    \item \textbf{delete}
+    
+    Borra el archivo especificado en el servidor remoto.
+    
+    El cliente envía el comando \textit{delete} seguido del nombre del archivo que desea eliminar. El servidor comprueba la existencia del archivo, y lo elimina.
+\end{itemize}
 
 \section{Defina qué es un servidor con estado (stateful server) y qué es un servidor sin estado (stateless server).}
 
