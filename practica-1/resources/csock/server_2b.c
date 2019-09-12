@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+
+void set_verbose_mode(int argc, char *argv[], int *verbose_flag_ptr);
+
 /*
  * En tiempo de compilación se puede definir esta macro con un valor numérico >= 0
  *
@@ -16,6 +19,7 @@
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1000
 #endif
+
 
 /*
  * Error
@@ -33,7 +37,6 @@ error(char *msg)
         exit(0);
 }
 
-void set_verbose_mode(int argc, char *argv[], int *verbose_flag_ptr);
 
 int
 main(int argc, char *argv[])

@@ -52,7 +52,19 @@ En este caso, el servidor cierra la conexión dada la primer request y envio de 
 
 \subsection{Muestre que no necesariamente siempre se leen/escriben todos los datos involucrados en las comunicaciones con una llamada read/write con sockets. Sugerencia: puede modificar los programas (C o Java o ambos) para que la cantidad de datos que se comunican sea de $10^3$ , $10^4$ , $10^5$ y $10^6$ bytes y contengan bytes asignados directamente en el programa (pueden no leer de teclado ni mostrar en pantalla cada uno de los datos del buffer), explicando el resultado en cada caso. Importante: notar el uso de “attempts” en “...attempts to read up to count bytes from file descriptor fd...” así como el valor de retorno de la función read (del man read).}
 
+Se modificó la implementación del cliente y servidor de forma tal que el tamaño del buffer pueda ser definido en tiempo de compilación. (\textit{Ver implementación en la sección \ref{apendix:2b}}). \\
+
+El tamaño del buffer tanto del cliente como del servidor se fue modificando con diferentes valores para ver hasta qué cantidad de datos podía leer, se probó con los siguientes valores: $10^3$ , $10^4$ , $10^5$ y $10^6$.
+
+El servidor pudo leer correctamente todos los caracteres para un buffer size menor o igual a $10^4$. Sin embargo, cuando se probó con un buffer size de $10^5$, solo pudo leer $\approx 65480$ caracteres.
+
 \subsection{Agregue a la modificación anterior una verificación de llegada correcta de los datos que se envían (cantidad y contenido del buffer), de forma tal que se asegure que todos los datos enviados llegan correctamente, independientemente de la cantidad de datos involucrados.}
+
+Para realiza esta implementación see agregó en el cliente y servidor una función de hashing, \mintinline{c}{unsigned long djb2(unsigned char *str);}, la cual genera un hash de los datos recibidos para después utilizarlo al realizar un checksum. (\textit{Ver implementación en la sección \ref{apendix:2c}}).
+
+El cliente genera un hash de los datos que se van a enviar. Una vez generado, se envían los datos, y se espera la respuesta del servidor para saber si los mismos fueron recibidos. Luego se envía el hash de los datos y el tamaño de los datos enviados. (\textit{Ver \ref{apendix:2c_client}}).
+
+Por otra parte, el servidor espera los datos, el hash y el tamaño de los datos enviados por el cliente. Una vez que tiene todo esto, genera el hash de los datos recibidos y compara el hash y la cantidad de datos recibidos con el hash que se recibió y el tamaño de los datos que envia el cliente. (\textit{Ver \ref{apendix:2c_server}}).
 
 \subsection{Grafique el promedio y la desviación estándar de los tiempos de comunicaciones de cada comunicación. Explique el experimento realizado para calcular el tiempo de comunicaciones.}
 
@@ -166,6 +178,8 @@ Para la implementación propia de un servidor de archivos remotos opto por una a
 
 \subsection{Ejercicio 2b} \label{apendix:2b}
 
+Modificación de los programas en C que permite variar el tamaño de los buffers en tiempo de compilación.
+
 \subsubsection{Cliente} \label{apendix:2b_client}
 
 \inputminted[mathescape]{c}{resources/csock/client_2b.c}
@@ -173,5 +187,17 @@ Para la implementación propia de un servidor de archivos remotos opto por una a
 \subsubsection{Servidor} \label{apendix:2b_server}
 
 \inputminted[mathescape]{c}{resources/csock/server_2b.c}
+
+\subsection{Ejercicio 2c} \label{apendix:2c}
+
+Modificación de los programas en C que permita verificar la llegada correcta de los datos.
+
+\subsubsection{Cliente} \label{apendix:2c_client}
+
+\inputminted[mathescape]{c}{resources/csock/client_2c.c}
+
+\subsubsection{Servidor} \label{apendix:2c_server}
+
+\inputminted[mathescape]{c}{resources/csock/server_2c.c}
 
 \end{document}
