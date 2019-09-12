@@ -68,6 +68,20 @@ Por otra parte, el servidor espera los datos, el hash y el tamaño de los datos 
 
 \subsection{Grafique el promedio y la desviación estándar de los tiempos de comunicaciones de cada comunicación. Explique el experimento realizado para calcular el tiempo de comunicaciones.}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{graph}
+    \caption{}
+    \label{figure:summary}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{graph_multi}
+    \caption{}
+    \label{figure:summary_flatten}
+\end{figure}
+
 \section{¿Por qué en C se puede usar la misma variable tanto para leer de teclado como para enviar por un socket? ¿Esto sería relevante para las aplicaciones c/s?}
 
 El header o prototipo de la función \textit{write} en C está dado por la siguiente expresión:
@@ -87,8 +101,6 @@ Por lo tanto, buffer es una variable de tipo puntero, la cual referencia un espa
 Es por esto que, dado que \textit{write} espera un argumento de tipo puntero y la variable \textit{buffer} tiene ese tipo, puedo utilizar la misma variable tanto para entrada de texto del teclado como para el envio del mismo por un socket. \\
 
 Esta potencia al momento de manejar memoria y punteros tiene ciertas desventajas al momento de programar una arquitectura como el modelo c/s. Se deben contar con precauciones dado que, siendo siempre un espacio de bytes, dependerá de como el cliente interprete los datos presentes en el espacio de memoria recibido al momento de acceder a la información.
-
-
 
 \section{¿Podría implementar un servidor de archivos remotos utilizando sockets? Describa brevemente la interfaz y los detalles que considere más importantes del diseño. No es necesario implementar.}
 

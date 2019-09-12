@@ -31,11 +31,8 @@ echo "Samples: $samples - patience: $patience"
 echo "Buffer size: $buffer_size"
 
 [ ! -d results ] && mkdir results
-if [[ ! -f "results/$output_path" ]]
-then
-  echo > results/$output_path
-  chmod 666 results/$output_path
-fi
+echo > results/$output_path
+chmod 666 results/$output_path
 
 if has_param '--build' "$@"
 then

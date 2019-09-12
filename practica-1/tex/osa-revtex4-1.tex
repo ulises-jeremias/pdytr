@@ -68,6 +68,26 @@ Por otra parte, el servidor espera los datos, el hash y el tamaño de los datos 
 
 \subsection{Grafique el promedio y la desviación estándar de los tiempos de comunicaciones de cada comunicación. Explique el experimento realizado para calcular el tiempo de comunicaciones.}
 
+Para medir los tiempos de ejecución se utiliza la función \textit{dwalltime} (\textit{Ver implementación en la sección \ref{apendix:2d}}).
+
+Para la realización de los experimentos se miden los tiempos de transmisión de $10^3$, $10^4$, $10^5$, $2*10^5$ y $10^6$ bytes. Cada una de estas configuraciones se ejecutan 10 veces.
+
+Luego, los tiempos recolectados en las pruebas se utilizan para calcular la media y desviación estándar para el envío de cada cantidad de datos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{graph_multi}
+    \caption{Gráficas de las curvas gaussianas para cada escenario utilizando buffer size de $10^3$, $10^4$, $10^5$ y $10^6$.}
+    \label{figure:summary_flatten}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{graph}
+    \caption{Gráfica comparativa de las curvas gaussianas para cada escenario utilizando buffer size de $10^3$, $10^4$, $10^5$ y $2*10^5$.}
+    \label{figure:summary}
+\end{figure}
+
 \section{¿Por qué en C se puede usar la misma variable tanto para leer de teclado como para enviar por un socket? ¿Esto sería relevante para las aplicaciones c/s?}
 
 El header o prototipo de la función \textit{write} en C está dado por la siguiente expresión:
@@ -87,8 +107,6 @@ Por lo tanto, buffer es una variable de tipo puntero, la cual referencia un espa
 Es por esto que, dado que \textit{write} espera un argumento de tipo puntero y la variable \textit{buffer} tiene ese tipo, puedo utilizar la misma variable tanto para entrada de texto del teclado como para el envio del mismo por un socket. \\
 
 Esta potencia al momento de manejar memoria y punteros tiene ciertas desventajas al momento de programar una arquitectura como el modelo c/s. Se deben contar con precauciones dado que, siendo siempre un espacio de bytes, dependerá de como el cliente interprete los datos presentes en el espacio de memoria recibido al momento de acceder a la información.
-
-
 
 \section{¿Podría implementar un servidor de archivos remotos utilizando sockets? Describa brevemente la interfaz y los detalles que considere más importantes del diseño. No es necesario implementar.}
 
@@ -182,11 +200,11 @@ Modificación de los programas en C que permite variar el tamaño de los buffers
 
 \subsubsection{Cliente} \label{apendix:2b_client}
 
-\inputminted[mathescape]{c}{resources/csock/client_2b.c}
+\inputminted[mathescape]{c}{../resources/csock/client_2b.c}
 
 \subsubsection{Servidor} \label{apendix:2b_server}
 
-\inputminted[mathescape]{c}{resources/csock/server_2b.c}
+\inputminted[mathescape]{c}{../resources/csock/server_2b.c}
 
 \subsection{Ejercicio 2c} \label{apendix:2c}
 
@@ -194,10 +212,21 @@ Modificación de los programas en C que permita verificar la llegada correcta de
 
 \subsubsection{Cliente} \label{apendix:2c_client}
 
-\inputminted[mathescape]{c}{resources/csock/client_2c.c}
+\inputminted[mathescape]{c}{../resources/csock/client_2c.c}
 
 \subsubsection{Servidor} \label{apendix:2c_server}
 
-\inputminted[mathescape]{c}{resources/csock/server_2c.c}
+\inputminted[mathescape]{c}{../resources/csock/server_2c.c}
 
+\subsection{Ejercicio 2d} \label{apendix:2d}
+
+Modificación de los programas en C que permita verificar medir tiempo de conexión.
+
+\subsubsection{Cliente} \label{apendix:2d_client}
+
+\inputminted[mathescape]{c}{../resources/csock/client_2d.c}
+
+\subsubsection{Servidor} \label{apendix:2d_server}
+
+La implementación del servidor no se modificó respecto de la presente en la sección \ref{apendix:2c_server}.
 \end{document}
