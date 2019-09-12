@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+has_param() {
+    local term="$1"
+    shift
+    for arg; do
+        if [[ $arg == "$term" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+. ./bin/flags/declares.sh
+
+variables["-s"]="samples"
+variables["-p"]="patience"
+variables["-bs"]="buffer_size"
+variables["-o"]="output_path"
+
+. ./bin/flags/arguments.sh
+
+samples=${samples:-10}
+patience=${patience:-10}
+buffer_size=${buffer_size:-1000}
+output_path=${output_path:-"bs-$buffer_size.dat"}
+
+SUMMARY_FILE="summary.csv"
+
+echo "Samples: $samples - patience: $patience"
+echo "Buffer size: $buffer_size"
+
+[ ! -d results ] && mkdir results
+if [[ ! -f "results/$output_path" ]]
+then
+  echo > results/$output_path
+  chmod 666 results/$output_path
+fi
+
+if has_param '--build' "$@"
+then
+  gcc client.c -o client-${buffer_size} -D BUFFER_SIZE=$buffer_size
+  gcc server.c -o server-${buffer_size} -D BUFFER_SIZE=$buffer_size
+fi
+
+for ((i=1; i <= $samples; i++))
+do
+  echo -e "Running $i of $samples experiments"
+
+  ./server-${buffer_size} 900${i} &> /dev/null &
+  ./client-${buffer_size} localhost 900${i} --brief 1 >> results/$output_path
+  
+  if [ $? -eq 1 ]
+  then
+    for ((j=1; j <= $patience; j++ ))
+    do
+      echo -e "Retrying - n° $j"
+      ./client-${buffer_size} localhost 900${i} 1 --brief >> results/$output_path
+      sleep 2
+    done
+    if [ "$?" -ne 1 ]
+    then
+      rm results/$output_path
+      exit 1
+    fi
+  fi
+  sleep 2
+done
+
+rm ./server-$buffer_size ./client-$buffer_size
+
+sd=`awk '{x+=$0;y+=$0^2}END{print sqrt(y/NR-(x/NR)^2)}' results/$output_path`
+mean=`awk '{for(i=1;i<=NF;i++)s+=$i}END{print s}' results/$output_path`
+
+if [[ ! -f "results/$SUMMARY_FILE" ]]; then
+  echo "buffer_size, mean, sd" > "results/$SUMMARY_FILE"
+  chmod 666 "results/$SUMMARY_FILE"
+fi
+
+echo "$buffer_size, $mean, $sd" >> "results/$SUMMARY_FILE"
+echo ""
+echo "Runtimes at: ./results/$output_path - Summary: ./results/$SUMMARY_FILE"

@@ -18,11 +18,12 @@
 
 \documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1} %% use 11pt for Applied Optics
 %\documentclass[osajnl,preprint,showpacs,superscriptaddress,11pt]{revtex4-1} %% use 12pt for preprint option
-\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz,minted}
+\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz}
 \usepackage[utf8]{inputenc}
 \graphicspath{{images/}}
 
 \usepackage{mathtools,enumitem}
+\usepackage{minted}
 
 \begin{document}
 
@@ -35,7 +36,7 @@
 
 \section{Identifique similitudes y diferencias entre los sockets en C y en Java}
 
-Para la creación y utilización de sockets en C se utiliza la librería estandar \textit{sys/socket.h}, mientras que en Java se utiliza la librería \textit{java.net} para la creación de los mismos y algunos módulos provenientes de la librería \textit{java.io} para interactuar con los mismos a modo de lectura y escritura. \\
+Para la creación y utilización de sockets en C se utiliza la librería estandar \textit{sys/socket.h}, mientras que en Java se utiliza la librería \textit{java.net} para la creación de los mismos y algunos módulos provenientes de la librería \textit{java.io} para interactuar con los mismos a modo de lectura y escritura.
 
 Una diferencia muy marcada es el enfoque de implementación de los Sockets en ambos lenguajes. Por un lado tenemos el enfoque de Java, que cuenta con una clase \textit{java.net.Socket}. La misma permite establecer una comunicación bidireccional entre dos procesos en una red dada (el programa que define el socket y otro en la red). Además, se cuenta con la clase \textit{java.net.ServerSocket} para definir más directamente sockets que estén escuchando y aceptando conexiones desde procesos clientes.
 
@@ -51,7 +52,19 @@ En este caso, el servidor cierra la conexión dada la primer request y envio de 
 
 \subsection{Muestre que no necesariamente siempre se leen/escriben todos los datos involucrados en las comunicaciones con una llamada read/write con sockets. Sugerencia: puede modificar los programas (C o Java o ambos) para que la cantidad de datos que se comunican sea de $10^3$ , $10^4$ , $10^5$ y $10^6$ bytes y contengan bytes asignados directamente en el programa (pueden no leer de teclado ni mostrar en pantalla cada uno de los datos del buffer), explicando el resultado en cada caso. Importante: notar el uso de “attempts” en “...attempts to read up to count bytes from file descriptor fd...” así como el valor de retorno de la función read (del man read).}
 
+Se modificó la implementación del cliente y servidor de forma tal que el tamaño del buffer pueda ser definido en tiempo de compilación. (\textit{Ver implementación en la sección \ref{apendix:2b}}). \\
+
+El tamaño del buffer tanto del cliente como del servidor se fue modificando con diferentes valores para ver hasta qué cantidad de datos podía leer, se probó con los siguientes valores: $10^3$ , $10^4$ , $10^5$ y $10^6$.
+
+El servidor pudo leer correctamente todos los caracteres para un buffer size menor o igual a $10^4$. Sin embargo, cuando se probó con un buffer size de $10^5$, solo pudo leer $\approx 65480$ caracteres.
+
 \subsection{Agregue a la modificación anterior una verificación de llegada correcta de los datos que se envían (cantidad y contenido del buffer), de forma tal que se asegure que todos los datos enviados llegan correctamente, independientemente de la cantidad de datos involucrados.}
+
+Para realiza esta implementación see agregó en el cliente y servidor una función de hashing, \mintinline{c}{unsigned long djb2(unsigned char *str);}, la cual genera un hash de los datos recibidos para después utilizarlo al realizar un checksum. (\textit{Ver implementación en la sección \ref{apendix:2c}}).
+
+El cliente genera un hash de los datos que se van a enviar. Una vez generado, se envían los datos, y se espera la respuesta del servidor para saber si los mismos fueron recibidos. Luego se envía el hash de los datos y el tamaño de los datos enviados. (\textit{Ver \ref{apendix:2c_client}}).
+
+Por otra parte, el servidor espera los datos, el hash y el tamaño de los datos enviados por el cliente. Una vez que tiene todo esto, genera el hash de los datos recibidos y compara el hash y la cantidad de datos recibidos con el hash que se recibió y el tamaño de los datos que envia el cliente. (\textit{Ver \ref{apendix:2c_server}}).
 
 \subsection{Grafique el promedio y la desviación estándar de los tiempos de comunicaciones de cada comunicación. Explique el experimento realizado para calcular el tiempo de comunicaciones.}
 
@@ -60,8 +73,22 @@ En este caso, el servidor cierra la conexión dada la primer request y envio de 
 El header o prototipo de la función \textit{write} en C está dado por la siguiente expresión:
 
 \begin{minted}{c}
-size_t write();
+size_t write(int fd, void *buf, size_t nbytes);
 \end{minted}
+
+donde \textit{buf} es un puntero al espacio de memoria de \textit{nbytes} bytes a partir del cual la system call obtendrá la información para escribir en el file descriptor. \\
+
+Luego, el valor enviado como segundo argumento de la función \textit{write} será cualquier puntero a un espacio de memoria, sea dinámica o estática. Es decir, podría enviar una referencia a un espacio de enteros (\mintinline{c}{int *}), espacio de caracteres (\mintinline{c}{char *}), etc.
+
+En el caso de la variable utilizada para leer de teclado, la misma se define como sigue: \mintinline{c}{char buffer[256];}
+
+Por lo tanto, buffer es una variable de tipo puntero, la cual referencia un espacio de memoria de caracteres alocado en forma estática.
+
+Es por esto que, dado que \textit{write} espera un argumento de tipo puntero y la variable \textit{buffer} tiene ese tipo, puedo utilizar la misma variable tanto para entrada de texto del teclado como para el envio del mismo por un socket. \\
+
+Esta potencia al momento de manejar memoria y punteros tiene ciertas desventajas al momento de programar una arquitectura como el modelo c/s. Se deben contar con precauciones dado que, siendo siempre un espacio de bytes, dependerá de como el cliente interprete los datos presentes en el espacio de memoria recibido al momento de acceder a la información.
+
+
 
 \section{¿Podría implementar un servidor de archivos remotos utilizando sockets? Describa brevemente la interfaz y los detalles que considere más importantes del diseño. No es necesario implementar.}
 
@@ -142,5 +169,35 @@ Para la implementación propia de un servidor de archivos remotos opto por una a
     A diferencia de un servidor con estado, el servidor sin estado es aquel que no mantiene ningún estado de la información para el usuario. En este tipo de servidores, cada consulta es completamente independiente a la anterior. \\
     Sin embargo, los servidores sin estado pueden identificar al usuario si la solicitud al servicio incluye una identificación de usuario única que se asignó anteriormente al mismo. Ese identificador (ID) del usuario deberá pasarse en cada consulta, a diferencia del caso de los servidores con estado que mantienen este ID de usuario en la sesión y los datos de la solicitud no necesariamente deben contener este ID.
 \end{itemize}
+
+\clearpage
+
+\onecolumngrid
+
+\section{Apéndice}
+
+\subsection{Ejercicio 2b} \label{apendix:2b}
+
+Modificación de los programas en C que permite variar el tamaño de los buffers en tiempo de compilación.
+
+\subsubsection{Cliente} \label{apendix:2b_client}
+
+\inputminted[mathescape]{c}{resources/csock/client_2b.c}
+
+\subsubsection{Servidor} \label{apendix:2b_server}
+
+\inputminted[mathescape]{c}{resources/csock/server_2b.c}
+
+\subsection{Ejercicio 2c} \label{apendix:2c}
+
+Modificación de los programas en C que permita verificar la llegada correcta de los datos.
+
+\subsubsection{Cliente} \label{apendix:2c_client}
+
+\inputminted[mathescape]{c}{resources/csock/client_2c.c}
+
+\subsubsection{Servidor} \label{apendix:2c_server}
+
+\inputminted[mathescape]{c}{resources/csock/server_2c.c}
 
 \end{document}
