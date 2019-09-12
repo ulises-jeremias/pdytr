@@ -105,7 +105,8 @@ main(int argc, char *argv[])
         
         printf("Receibed message with %d characters\n", n);
 
-        if (verbose_flag) {
+        if (verbose_flag)
+        {
                 printf("Message content:\n%s\n", buffer);
         }
 
@@ -113,7 +114,14 @@ main(int argc, char *argv[])
         size_t data_length;
         n = read(newsockfd, &data_length, sizeof(data_length));
         if (n < 0) error("ERROR reading from socket");
-        printf("Received size: %lu\nSize sent by Client %lu\n", strlen(buffer), data_length);
+        if (strlen(buffer) == data_length)
+        {
+                printf("Length match!! Received size: %lu\nSize sent by Client %lu\n",
+                       strlen(buffer),
+                       data_length);
+        } else {
+                printf("The size received and the size of the data do not match\n");
+        }
 
         /* Get client checksum */
         unsigned long buffer_checksum;
