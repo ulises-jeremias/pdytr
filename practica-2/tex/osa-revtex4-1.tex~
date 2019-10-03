@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         File: osa-revtex4-1.tex                             %
+%                        Date: April 15, 2013                                 %
+%                                                                             %
+%                              BETA VERSION!                                  %
+%                   JOSA A, JOSA B, Applied Optics, Optics Letters            %
+%                                                                             %
+%            This file requires the substyle file osajnl4-1.rtx,              %
+%                   running under REVTeX 4.1 and LaTeX 2e                     %
+%                                                                             %
+%                   USE THE FOLLOWING REVTeX 4-1 OPTIONS:                     %
+% \documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1}%
+%                    %% Use 11pt for Applied Optics                           %
+%                                                                             %
+%               (c) 2013 The Optical Society of America                       %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1} %% use 11pt for Applied Optics
+%\documentclass[osajnl,preprint,showpacs,superscriptaddress,11pt]{revtex4-1} %% use 12pt for preprint option
+\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz}
+\usepackage[utf8]{inputenc}
+\graphicspath{{images/}}
+
+\usepackage{mathtools,enumitem}
+\usepackage{minted}
+
+\begin{document}
+
+\title{Programación Distribuida y Tiempo Real}
+
+\author{Ulises Jeremias Cornejo Fandos}
+\affiliation{Licenciatura en Informática, Facultad de Informática, UNLP}
+
+\maketitle %% required
+
+\section{Para los ejemplos de RPC proporcionados (*.tar, analizar en el orden dado a los nombres de
+los archivos):}
+
+\subsection{Mostrar cómo serían los mismos procedimientos si fueran locales, es decir haciendo el
+proceso inverso del realizado en la clase de explicación de RPC.}
+
+Si los procesos fueran todos locales, la programación de los mismos resultaria en una compilación de uno o más ".c" con una única función \textit{main} y un único binario ejecutable. En el ejemplo provisto se puede observar como todo el código del programa se encuentra en un único ".c", como se describe anteriormente.
+
+En este caso no habría latencia en la comunicación dado que no existiría tal comunicacón. Al no definirse un modelo cliente/servidor, ya no existiría una comunicación entre hosts y todos los llamados a funciones se realizarían en el mismo espacio de direcciones.
+
+\subsection{Ejecutar los procesos y mostrar la salida obtenida (del “cliente” y del “servidor”) en cada
+uno de los casos.}
+
+Las capturas se muestran a continuación:
+
+\subsection{Mostrar experimentos donde se produzcan errores de conectividad del lado del cliente y
+del lado del servidor. Si es necesario realice cambios mínimos para, por ejemplo, incluir
+sleep() o exit(), de forma tal que no se reciban comunicaciones o no haya receptor para
+las comunicaciones. Verifique con UDP y con TCP.}
+
+\onecolumngrid
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.80\textwidth]{capturas/1-simp-client}
+    \caption{}
+    \label{figure:1-simp-client}
+\end{figure}
+
+\twocolumngrid
+
+\end{document}
