@@ -8,10 +8,10 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-unsigned long
+uint64_t
 djb2(char *str)
 {
-        unsigned long hash = 5381;
+        uint64_t hash = 5381;
         int c;
 
         while ((c = *str++))
@@ -34,11 +34,12 @@ dwalltime(void)
 
 
 void
-ini_params(int argc, char *argv[], int *verbose_flag_ptr,
+ini_params(int argc, char *argv[], int *verbose_flag_ptr, int *all_flag_ptr,
            char *host, char *src, char *dest,
            uint64_t *bytes, uint64_t *initial_pos)
 {
         static int verbose_flag;
+        static int all_flag = 0;
         int c;
 
         while (1)
@@ -47,6 +48,7 @@ ini_params(int argc, char *argv[], int *verbose_flag_ptr,
                 {
                         {"verbose", no_argument, &verbose_flag, 1},
                         {"brief", no_argument, &verbose_flag, 0},
+                        {"all", no_argument, &all_flag, 1},
                         {"bytes", required_argument, 0, 'a'},
                         {"pos", required_argument, 0, 'p'},
                         {"host", required_argument, 0, 'h'},
@@ -57,7 +59,7 @@ ini_params(int argc, char *argv[], int *verbose_flag_ptr,
                 /* getopt_long stores the option index here. */
                 int option_index = 0;
 
-                c = getopt_long(argc, argv, "vbs:d:h:a:p:",
+                c = getopt_long(argc, argv, "vbls:d:h:a:p:",
                                 long_options, &option_index);
 
                 /* Detect the end of the options. */
@@ -80,6 +82,9 @@ ini_params(int argc, char *argv[], int *verbose_flag_ptr,
                         break;
                 case 'b':
                         verbose_flag = 0;
+                        break;
+                case 'l':
+                        all_flag = 1;
                         break;
                 case 's':
                         strcpy(src, optarg);
@@ -105,4 +110,5 @@ ini_params(int argc, char *argv[], int *verbose_flag_ptr,
         }
 
         *verbose_flag_ptr = verbose_flag;
+        *all_flag_ptr = all_flag;
 }

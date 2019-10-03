@@ -13,6 +13,7 @@ int
 main(int argc, char *argv[])
 {
         static int verbose_flag;
+        static int all_flag;
 
         CLIENT *clnt;
         int i;
@@ -37,6 +38,11 @@ main(int argc, char *argv[])
                         .description="Store a file from --src to --dest",
                         .handle=&ftp_read,
                 },
+                {
+                        .name="list",
+                        .description="List all files from --src",
+                        .handle=&ftp_list,
+                }
         };
 
         if (argc < 2)
@@ -65,7 +71,7 @@ main(int argc, char *argv[])
                 exit(1);
         }
 
-        ini_params(argc, argv, &verbose_flag, host, src, dest, &bytes, &initial_pos);
+        ini_params(argc, argv, &verbose_flag, &all_flag, host, src, dest, &bytes, &initial_pos);
 
         /* Instead of reporting ‘--verbose’
         and ‘--brief’ as they are encountered,
@@ -107,6 +113,7 @@ main(int argc, char *argv[])
 
         ftp_param_t param = {
                 .verbose_flag = verbose_flag,
+                .all_flag = all_flag,
                 .src = src,
                 .dest = dest,
                 .bytes = bytes,

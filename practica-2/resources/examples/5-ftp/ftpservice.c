@@ -23,12 +23,11 @@
 int *
 write_1_svc(ftp_file arg, struct svc_req *rqstp)
 {
-        printf("HOLAAAA");
         char *name = arg.name;
         char *buffer = (char *) malloc(DATA_SIZE);
         strcpy(buffer, arg.data.data_val);
         int length = arg.data.data_len;
-        unsigned long income_checksum = arg.checksum;
+        uint64_t income_checksum = arg.checksum;
 
         printf("name: %s - buffer length: %d\n", name, length);
 
@@ -69,10 +68,10 @@ write_1_svc(ftp_file arg, struct svc_req *rqstp)
         }
     
         // Check checksum
-        unsigned long checksum = djb2(buffer);
+        uint64_t checksum = djb2(buffer);
         if (income_checksum != checksum)
         {
-                // fprintf(stderr, "Error in checksum!!\nOriginal: %"PRIu64"\nOwn: %"PRIu64"\n", income_checksum, checksum);
+                fprintf(stderr, "Error in checksum!!\nOriginal: %"PRIu64"\nOwn: %"PRIu64"\n", income_checksum, checksum);
         }
 
         // Write file
@@ -94,11 +93,12 @@ read_1_svc(ftp_req arg, struct svc_req *rqstp)
         FILE *file;
         ftp_file *file_struct;
 
-        file_struct = (ftp_file *) malloc(sizeof(char *) + sizeof(unsigned int) + sizeof(char *) + sizeof(unsigned long));
+        file_struct = (ftp_file *) malloc(sizeof(char *) + sizeof(unsigned int) + sizeof(char *) + sizeof(uint64_t));
         file_struct->data.data_val = (char *) malloc(DATA_SIZE);
 
         file = fopen(name, "r");
-        if (file == NULL) {
+        if (file == NULL)
+        {
                 fprintf(stderr, "Error opening file %s\n", name);
                 file_struct->data.data_len = -1;
                 return file_struct;
@@ -110,4 +110,40 @@ read_1_svc(ftp_req arg, struct svc_req *rqstp)
         file_struct->name = strcpy(file_struct->name, name);
 
         return file_struct;
+}
+
+char **
+list_1_svc(ftp_lreq arg, struct svc_req *rqstp)
+{
+        DIR *dir;
+        char **paths;
+        paths = (char **) malloc(sizeof(char *));
+        *paths = (char *) malloc(PATH_MAX);
+        *paths = strcpy(*paths, "");
+        struct dirent *dir_str;
+
+        dir = opendir(arg.name);
+        if (dir)
+        {
+                while ((dir_str = readdir(dir)) != NULL)
+                {
+                        if (strcmp(dir_str->d_name, ".") && strcmp(dir_str->d_name, ".."))
+                        {
+                                strcat(paths[0], dir_str->d_name);
+                                strcat(*paths, "\t");
+                                if (arg.all)
+                                        strcat(*paths, "\n");
+                        }
+                }
+
+                strcat(*paths, "\n");
+                closedir(dir);
+        }
+        else
+        {
+                snprintf(*paths, PATH_MAX, "list: cannot access %s: No such directory", arg.name);
+        }
+
+
+        return paths;
 }

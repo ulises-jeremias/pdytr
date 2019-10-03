@@ -4,7 +4,9 @@
 
 #include <stddef.h>
 
-typedef struct ftp_param {
+typedef struct ftp_param
+{
+        int all_flag;
         int verbose_flag;
         char *src;
         char *dest;
@@ -23,5 +25,6 @@ typedef struct command
 
 int ftp_read(CLIENT *clnt, ftp_param_t *param);
 int ftp_write(CLIENT *clnt, ftp_param_t *param);
+int ftp_list(CLIENT *clnt, ftp_param_t *param);
 
 #endif

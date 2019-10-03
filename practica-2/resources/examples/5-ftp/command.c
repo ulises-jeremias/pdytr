@@ -107,3 +107,23 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
 
         return(*result);
 }
+
+/* Wrapper function takes care of calling the RPC procedure */
+int
+ftp_list(CLIENT *clnt, ftp_param_t *param)
+{
+        int all = param->all_flag;
+        char *src = param->src;
+
+        ftp_lreq req = {
+                .name = src,
+                .all = all,
+        };
+
+        char **paths;
+        paths = list_1(req, clnt);
+
+        printf("%s", paths[0]);
+
+        return 1;
+}
