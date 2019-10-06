@@ -24,12 +24,12 @@ int *
 write_1_svc(ftp_file arg, struct svc_req *rqstp)
 {
         char *name = arg.name;
-        char *buffer = (char *) malloc(DATA_SIZE);
-        strcpy(buffer, arg.data.data_val);
+        char *mode = arg.mode;
         int length = arg.data.data_len;
         uint64_t income_checksum = arg.checksum;
 
-        printf("name: %s - buffer length: %d\n", name, length);
+        char *buffer = (char *) malloc(1026);
+        strncpy(buffer, arg.data.data_val, length);
 
         // Declare variables
 	FILE *file;
@@ -59,7 +59,7 @@ write_1_svc(ftp_file arg, struct svc_req *rqstp)
         }
 
         // Open file and check errors
-        file = fopen(path, "w");
+        file = fopen(path, mode);
         if (file == NULL)
         {
                 fprintf(stderr, "Error creating file '%s'\n", path);

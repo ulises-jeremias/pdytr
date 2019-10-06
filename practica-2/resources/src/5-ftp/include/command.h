@@ -8,6 +8,7 @@ typedef struct ftp_param
 {
         int all_flag;
         int verbose_flag;
+        int bytes_flag;
         char *src;
         char *dest;
         uint64_t bytes;

@@ -14,6 +14,9 @@ main(int argc, char *argv[])
 {
         static int verbose_flag;
         static int all_flag;
+        static int bytes_flag = 0;
+
+        uint64_t bytes = 0, initial_pos = 0;
 
         CLIENT *clnt;
         int i;
@@ -24,8 +27,6 @@ main(int argc, char *argv[])
         char host[PATH_MAX];
 
         strcpy(src, ""); strcpy(dest, ""); strcpy(host, "");
-
-        uint64_t bytes = DATA_SIZE, initial_pos = 0;
 
         static command_t commands[] = {
                 {
@@ -47,11 +48,11 @@ main(int argc, char *argv[])
 
         if (argc < 2)
         {
-                fprintf(stderr,"Usage: %s\n",argv[0]);
+                fprintf(stderr,"Usage: %s\n", argv[0]);
                 for (i = 0; i < sizeof(commands)/sizeof(command_t); i++)
                 {
                         fprintf(stderr, "\t- %s: %s\n", commands[i].name, commands[i].description);
-                }  
+                }
                 exit(0);
         }
 
@@ -71,7 +72,7 @@ main(int argc, char *argv[])
                 exit(1);
         }
 
-        ini_params(argc, argv, &verbose_flag, &all_flag, host, src, dest, &bytes, &initial_pos);
+        ini_params(argc, argv, &verbose_flag, &all_flag, &bytes_flag, host, src, dest, &bytes, &initial_pos);
 
         /* Instead of reporting ‘--verbose’
         and ‘--brief’ as they are encountered,
@@ -114,6 +115,7 @@ main(int argc, char *argv[])
         ftp_param_t param = {
                 .verbose_flag = verbose_flag,
                 .all_flag = all_flag,
+                .bytes_flag = bytes_flag,
                 .src = src,
                 .dest = dest,
                 .bytes = bytes,

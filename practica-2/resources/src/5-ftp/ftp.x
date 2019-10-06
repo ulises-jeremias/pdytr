@@ -4,6 +4,7 @@
 
 struct ftp_file {
     string name<PATH_MAX>;
+    string mode<>;
 	opaque data<>;
 	uint64_t checksum;
 };

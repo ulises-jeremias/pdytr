@@ -34,7 +34,8 @@ dwalltime(void)
 
 
 void
-ini_params(int argc, char *argv[], int *verbose_flag_ptr, int *all_flag_ptr,
+ini_params(int argc, char *argv[],
+           int *verbose_flag_ptr, int *all_flag_ptr, int *bytes_flag,
            char *host, char *src, char *dest,
            uint64_t *bytes, uint64_t *initial_pos)
 {
@@ -96,6 +97,7 @@ ini_params(int argc, char *argv[], int *verbose_flag_ptr, int *all_flag_ptr,
                         strcpy(host, optarg);
                         break;
                 case 'a':
+                        *bytes_flag = 1;
                         *bytes = atoi(optarg);
                         break;
                 case 'p':

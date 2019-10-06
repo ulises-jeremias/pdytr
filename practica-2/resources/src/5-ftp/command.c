@@ -55,6 +55,7 @@ int
 ftp_write(CLIENT *clnt, ftp_param_t *param)
 {
         int verbose = param->verbose_flag;
+        int bytes_flag = param->bytes_flag;
         char *src = param->src;
         char *dest = param->dest;
         uint64_t bytes = param->bytes;
@@ -64,6 +65,7 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
                 printf("src: %s - dest: %s - bytes: %lu - pos: %lu\n", src, dest, bytes, initial_pos);
 
         FILE* file;
+        int *result;
 
         file = fopen(src, "r");
         if (file == NULL)
@@ -72,36 +74,47 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
                 exit(1);
         }
 
-        ftp_file ftp_file_data;
-        int *result;
+        uint64_t bytes_read, total_bytes_read = 0;
+        char *buffer = (char *) malloc(1026);
 
-        /* Gather everything into a single data structure to send to the server */
-        ftp_file_data.data.data_val = (char *) malloc(DATA_SIZE);
-        ftp_file_data.data.data_len = fread(ftp_file_data.data.data_val, sizeof(char), bytes, file);
-        ftp_file_data.name = (char *) malloc(PATH_MAX);
-        ftp_file_data.name = strcpy(ftp_file_data.name, dest);
-        ftp_file_data.checksum = djb2(ftp_file_data.data.data_val);
+        while ((bytes_read = fread(buffer, sizeof(char), 1024, file)) > 0 && (total_bytes_read <= bytes || !bytes_flag))
+        {
+                ftp_file ftp_file_data;
+
+                ftp_file_data.data.data_val = (char *) malloc(bytes_read);
+
+                /* Gather everything into a single data structure to send to the server */
+                ftp_file_data.data.data_val = strncpy(ftp_file_data.data.data_val, buffer, bytes_read);
+                ftp_file_data.data.data_len = bytes_read;
+                ftp_file_data.name = (char *) malloc(PATH_MAX);
+                ftp_file_data.name = strcpy(ftp_file_data.name, dest);
+                ftp_file_data.mode = total_bytes_read ? "a+" : "w";
+                ftp_file_data.checksum = djb2(ftp_file_data.data.data_val);
+
+                if (verbose)
+                        printf("dest: %s\ndata: %s\nsize: %d\nchecksum: %" PRIu64 "\n",
+                               ftp_file_data.name,
+                               ftp_file_data.data.data_val,
+                               ftp_file_data.data.data_len,
+                               ftp_file_data.checksum);
+
+                /* Call the client stub created by rpcgen */
+                result = write_1(ftp_file_data, clnt);
+                if (result == NULL)
+                {
+                        fprintf(stderr, "Trouble calling remote procedure\n");
+                        fclose(file);
+                        exit(0);
+                }
+                else if (*result == -1)
+                {
+                        fprintf(stderr, "Error creating file 'store/%s' in server\n", dest);
+                }
+
+                total_bytes_read += bytes_read;
+        }
 
         fclose(file);
-
-        if (verbose)
-                printf("dest: %s\ndata: %s\nsize: %d\nchecksum: %" PRIu64 "\n",
-                       ftp_file_data.name,
-                       ftp_file_data.data.data_val,
-                       ftp_file_data.data.data_len,
-                       ftp_file_data.checksum);
-
-        /* Call the client stub created by rpcgen */
-        result = write_1(ftp_file_data, clnt);
-        if (result == NULL)
-        {
-                fprintf(stderr,"Trouble calling remote procedure\n");
-                exit(0);
-        }
-        else if (*result == -1)
-        {
-                fprintf(stderr, "Error creating file 'store/%s' in server\n", dest);
-        }
 
         printf("File stored at 'store/%s'\n", dest);
 
