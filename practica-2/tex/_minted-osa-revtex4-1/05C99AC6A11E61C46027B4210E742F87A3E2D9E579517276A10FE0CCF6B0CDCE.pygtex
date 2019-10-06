@@ -1,3 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k+kt}{int} \PYG{o}{*}\PYG{n+nf}{add\PYGZus{}1\PYGZus{}svc}\PYG{p}{(}\PYG{n}{operands} \PYG{o}{*}\PYG{n}{argp}\PYG{p}{,} \PYG{k}{struct} \PYG{n}{svc\PYGZus{}req} \PYG{o}{*}\PYG{n}{rqstp}\PYG{p}{);}
-\end{Verbatim}
