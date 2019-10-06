@@ -1,0 +1,39 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{c+cp}{\PYGZsh{}define VERSION\PYGZus{}NUMBER 1}
+
+\PYG{o}{\PYGZpc{}}\PYG{err}{\PYGZsh{}}\PYG{n}{define} \PYG{n}{DATA\PYGZus{}SIZE} \PYG{n}{UINT\PYGZus{}MAX}
+
+\PYG{k}{struct} \PYG{n}{ftp\PYGZus{}file} \PYG{p}{\PYGZob{}}
+    \PYG{n}{string} \PYG{n}{name}\PYG{o}{\PYGZlt{}}\PYG{n}{PATH\PYGZus{}MAX}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+	\PYG{n}{opaque} \PYG{n}{data}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{;}
+    \PYG{k+kt}{int} \PYG{n}{continue\PYGZus{}reading}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{struct} \PYG{n}{ftp\PYGZus{}wfile} \PYG{p}{\PYGZob{}}
+    \PYG{n}{string} \PYG{n}{name}\PYG{o}{\PYGZlt{}}\PYG{n}{PATH\PYGZus{}MAX}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+    \PYG{n}{string} \PYG{n}{mode}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{;}
+	\PYG{n}{opaque} \PYG{n}{data}\PYG{o}{\PYGZlt{}\PYGZgt{}}\PYG{p}{;}
+	\PYG{k+kt}{uint64\PYGZus{}t} \PYG{n}{checksum}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{struct} \PYG{n}{ftp\PYGZus{}lreq} \PYG{p}{\PYGZob{}}
+    \PYG{n}{string} \PYG{n}{name}\PYG{o}{\PYGZlt{}}\PYG{n}{PATH\PYGZus{}MAX}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+    \PYG{k+kt}{int} \PYG{n}{all}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{struct} \PYG{n}{ftp\PYGZus{}req} \PYG{p}{\PYGZob{}}
+    \PYG{n}{string} \PYG{n}{name}\PYG{o}{\PYGZlt{}}\PYG{n}{PATH\PYGZus{}MAX}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+    \PYG{k+kt}{uint64\PYGZus{}t} \PYG{n}{pos}\PYG{p}{;}
+    \PYG{k+kt}{uint64\PYGZus{}t} \PYG{n}{bytes}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{n}{program} \PYG{n}{FTP\PYGZus{}PROG} \PYG{p}{\PYGZob{}}
+    \PYG{n}{version} \PYG{n}{FTP\PYGZus{}VERSION} \PYG{p}{\PYGZob{}}
+        \PYG{n}{ftp\PYGZus{}file} \PYG{n}{READ}\PYG{p}{(}\PYG{n}{ftp\PYGZus{}req}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{;}
+        \PYG{k+kt}{int} \PYG{n+nf}{WRITE}\PYG{p}{(}\PYG{n}{ftp\PYGZus{}wfile}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{;}
+        \PYG{n}{string} \PYG{n+nf}{LIST}\PYG{p}{(}\PYG{n}{ftp\PYGZus{}lreq}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{3}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}} \PYG{o}{=} \PYG{n}{VERSION\PYGZus{}NUMBER}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}} \PYG{o}{=} \PYG{l+m+mi}{555555555}\PYG{p}{;}
+
+\PYG{c+cp}{\PYGZsh{}define FTP\PYGZus{}PROG 555555555}
+\end{Verbatim}

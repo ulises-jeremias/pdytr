@@ -12,17 +12,17 @@
 int
 ftp_read(CLIENT *clnt, ftp_param_t *param)
 {
-        int verbose = param->verbose_flag;
         char *src = param->src;
         char *dest = param->dest;
         uint64_t bytes = param->bytes;
         uint64_t initial_pos = param->initial_pos;
-
-        if (verbose)
-                printf("src: %s - dest: %s - bytes: %lu - pos: %lu\n", src, dest, bytes, initial_pos);
+        int read_all = !param->bytes_flag;
 
         FILE* file;
         ftp_file *ftp_file_data;
+        ftp_file_data = (ftp_file *) malloc(sizeof(ftp_file));
+        
+        ftp_file_data->continue_reading = 1;
 
         ftp_req req = {
                 .name = src,
@@ -30,21 +30,36 @@ ftp_read(CLIENT *clnt, ftp_param_t *param)
                 .bytes = bytes,
         };
 
-        ftp_file_data = read_1(req, clnt);
-        if (ftp_file_data == NULL)
-        {
-                fprintf(stderr, "Trouble calling remote procedure\n");
-                exit(0);
-        }
-
-        printf("Storing file %s...\n", dest);
         file = fopen(dest, "w");
+
         if (file == NULL)
         {
                 fprintf(stderr, "Error opening file %s\n", src);
                 exit(1);
         }
-        fwrite(ftp_file_data->data.data_val, sizeof(char), ftp_file_data->data.data_len, file);
+
+        printf("Storing file %s...\n", dest);
+        while(ftp_file_data->continue_reading && (bytes > 0 || read_all))
+        {
+
+                ftp_file_data = read_1(req, clnt);
+                if (ftp_file_data == NULL)
+                {
+                        fprintf(stderr, "Trouble calling remote procedure\n");
+                        exit(0);
+                }
+
+                fwrite(ftp_file_data->data.data_val, sizeof(char), ftp_file_data->data.data_len, file);
+                req.pos = req.pos + ftp_file_data->data.data_len;
+                
+                if (!read_all)
+                {
+                        req.bytes = req.bytes - ftp_file_data->data.data_len;
+                        bytes = req.bytes;
+                }
+        }
+        printf("Done.\n");
+
         fclose(file);
 
         return 1;
@@ -79,7 +94,7 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
 
         while ((bytes_read = fread(buffer, sizeof(char), 1024, file)) > 0 && (total_bytes_read <= bytes || !bytes_flag))
         {
-                ftp_file ftp_file_data;
+                ftp_wfile ftp_file_data;
 
                 ftp_file_data.data.data_val = (char *) malloc(bytes_read);
 

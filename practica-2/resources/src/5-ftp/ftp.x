@@ -4,6 +4,12 @@
 
 struct ftp_file {
     string name<PATH_MAX>;
+	opaque data<>;
+    int continue_reading;
+};
+
+struct ftp_wfile {
+    string name<PATH_MAX>;
     string mode<>;
 	opaque data<>;
 	uint64_t checksum;
@@ -23,7 +29,7 @@ struct ftp_req {
 program FTP_PROG {
     version FTP_VERSION {
         ftp_file READ(ftp_req) = 1;
-        int WRITE(ftp_file) = 2;
+        int WRITE(ftp_wfile) = 2;
         string LIST(ftp_lreq) = 3;
     } = VERSION_NUMBER;
 } = 555555555;

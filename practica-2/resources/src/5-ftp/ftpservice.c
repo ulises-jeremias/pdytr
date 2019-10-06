@@ -21,7 +21,7 @@
    pointer to it */
 
 int *
-write_1_svc(ftp_file arg, struct svc_req *rqstp)
+write_1_svc(ftp_wfile arg, struct svc_req *rqstp)
 {
         char *name = arg.name;
         char *mode = arg.mode;
@@ -90,16 +90,30 @@ read_1_svc(ftp_req arg, struct svc_req *rqstp)
 	uint64_t pos = arg.pos;
 	uint64_t bytes = arg.bytes;
 
+        char path[PATH_MAX];
+
+        // Set path
+        snprintf(path, PATH_MAX, "%s/%s", "store", name);
+
         FILE *file;
         ftp_file *file_struct;
 
-        file_struct = (ftp_file *) malloc(sizeof(char *) + sizeof(unsigned int) + sizeof(char *) + sizeof(uint64_t));
-        file_struct->data.data_val = (char *) malloc(DATA_SIZE);
+        file_struct = (ftp_file *) malloc(sizeof(ftp_file));
+        
+        if (bytes > 0 && bytes <= 1024)
+        {
+                file_struct->data.data_val = (char *) malloc(bytes);
+        }
+        else
+        {
+                file_struct->data.data_val = (char *) malloc(sizeof(char) * 1024);
+                bytes = 1024;
+        }
 
-        file = fopen(name, "r");
+        file = fopen(path, "r");
         if (file == NULL)
         {
-                fprintf(stderr, "Error opening file %s\n", name);
+                fprintf(stderr, "Error opening file %s\n", path);
                 file_struct->data.data_len = -1;
                 return file_struct;
         }
@@ -108,6 +122,7 @@ read_1_svc(ftp_req arg, struct svc_req *rqstp)
         file_struct->data.data_len = fread(file_struct->data.data_val, sizeof(char), bytes, file);
         file_struct->name = (char *) malloc(PATH_MAX);
         file_struct->name = strcpy(file_struct->name, name);
+        file_struct->continue_reading = !feof(file);
 
         return file_struct;
 }

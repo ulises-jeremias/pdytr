@@ -198,4 +198,101 @@ El servicio recibe punteros a estas estructuras, las cuales va a trabajar y reto
 
 Esto nos permite trabajar con cualquier tipo de C, siempre volviendo a castear a la estructura definida a partir del ".x".
 
+\section{Con la finalidad de contar con una versión muy restringida de un sistema de archivos remoto, en el cual se puedan llevar a cabo las operaciones enunciadas informalmente como:}
+
+\begin{itemize}
+  \item \textbf{leer}: dado un nombre de archivo, una posición y una cantidad de bytes a leer, retorna 1) los bytes efectivamente leídos desde la posición pedida y la cantidad pedida en caso de ser posible, y 2) la cantidad de bytes que efectivamente se retornan leídos.
+  
+  \item \textbf{escribir}: dado un nombre de archivo, una cantidad de bytes determinada, y un buffer a partir del cual están los datos, se escriben los datos en el archivo dado. Si el archivo existe, los datos se agregan al final, si el archivo no existe, se crea y se le escriben los datos. En todos los casos se retorna la cantidad de bytes escritos.
+\end{itemize}
+
+
+\subsection{Defina e implemente con RPC un servidor. Documente todas las decisiones tomadas.}
+
+\subsection{Implemente un cliente RPC del servidor anterior que copie un archivo del sistema de
+archivos del servidor en el sistema de archivos local y genere una copia del mismo archivo
+en el sistema de archivos del servidor. En todos los casos se deben usar las operaciones
+de lectura y escritura del servidor definidas en el item anterior, sin cambios específicos
+del servidor para este item en particular. Al finalizar la ejecución del cliente deben quedar
+tres archivos en total: el original en el lado del servidor, una copia del original en el lado
+del cliente y una copia en el servidor del archivo original. El comando diff no debe
+identificar ninguna diferencia entre ningún par de estos tres archivos.}
+
+Para este punto, se implementaron las funciones básicas, \texttt{write}, \texttt{read} y \texttt{list}
+
+Como primera instancia, se define el archivo \texttt{.x} de la siguiente forma:
+
+\inputminted[mathescape]{c}{../resources/src/5-ftp/ftp.x}
+
+Se busco manejar cualquier tipo de archivos, por eso el uso del tipo opaque.
+
+Luego se definieron el cliente junto a los comandos disponibles.
+
+Con el objetivo de mejorar la legibilidad del codigo, se opto por utilizar un arreglo de estructuras con punteros a funciones para diferenciar rapidamente los comandos.
+
+El parseo de los argumentos al cliente cuenta con 2 etapas, la primera busca algun comando valido, y se realiza a recorriendo manualmente \texttt{argv}. \\
+La segunda busca las flags posibles para los comandos, esto se hizo usando la libreria \texttt{getopt} para mayor facilidad.
+
+La conexion con el servidor tuvo que ser obligatoriamente del tipo \textbf{TCP} para soportar los grandes volumenes de datos.
+
+
+\section{Timeouts en RPC:}
+
+\subsection{Desarrollar un experimento que muestre el timeout definido para las llamadas RPC y el
+promedio de tiempo de una llamada RPC.}
+
+Para el experimento del timeout usaremos el caso 1-simple. 
+Vemos que si ponemos en el proceso servidor un delay de 25 mediante un sleep(25) en el medio de la comunicación:
+
+Entonces la comunicación se realiza exitosamente y la llamada al proceso remoto termina de forma correcta.
+
+En cambio si ponemos en el proceso servidor un delay de 26 mediante un sleep(26) en el medio de la comunicación.
+
+Entonces la comunicación se corta por parte del cliente y la llamada no se completa. (\textit{Ver fig. \ref{figure:6-sleep-timeout-25}}).
+
+Mediante estos resultados podemos afirmar que el timeout definido en el proceso cliente es el 25 segundos, por los que si el proceso servidor o la comunicación tardan más de ese tiempo entonces el cliente finalizará la comunicación abruptamente dando por sentado una falla en la misma.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{capturas/6-sleep-timeout-25}
+    \caption{Tiempos de ejecución calculados al momento de alcanzar el timeout}.
+    \label{figure:6-sleep-timeout-25}
+\end{figure}
+
+\subsection{Reducir el timeout de las llamadas RPC a un 10\% menos del promedio encontrado
+anteriormente. Mostrar y explicar el resultado para 10 llamadas.}
+
+Luego de enviar una solicitud al servidor, un proceso cliente espera un período default de 25 segundos para recibir una respuesta. Este valor puede ser modificado utilizando la rutina \mintinline{c}{clnt_control()}.
+
+Usando una estructura timeval, se puede configurar los segundos que se deseen para el timeout del cliente se la siguiente forma:
+
+\begin{minted}{c}
+struct timeval tv;
+CLIENT *clnt;
+
+tv.tv_sec = 60;	
+tv.tv_usec = 0;
+
+clnt_control(clnt, CLSET_TIMEOUT, &tv);
+\end{minted}
+
+
+Teniendo en cuenta esto, se prueba con un timeout de 10 segundos, realizando el experimento anterior nuevamente 10 veces obteniendo el siguiente resultado. (\textit{Ver fig. \ref{figure:6-sleep-timeout-10}}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{capturas/6-sleep-timeout-10}
+    \caption{Tiempos de ejecución calculados al momento de alcanzar el timeout}.
+    \label{figure:6-sleep-timeout-10}
+\end{figure}
+
+
+\subsection{Desarrollar un cliente/servidor RPC de forma tal que siempre se supere el tiempo de
+timeout. Una forma sencilla puede utilizar el tiempo de timeout como parámetro del
+procedimiento remoto, donde se lo utiliza del lado del servidor en una llamada a sleep(),
+por ejemplo.}
+
+En la estructura cliente/servidor generada, se recibe como argumento un tiempo el cual define el timeout del cliente y se envia al servidor para que este haga un sleep con el cuadrado de ese tiempo para que siempre se genere un timeout.
+
+
 \end{document}
