@@ -75,7 +75,7 @@ write_1_svc(ftp_wfile arg, struct svc_req *rqstp)
         }
 
         // Write file
-        result = fwrite(buffer, sizeof(char), length, file);
+        result = fwrite(arg.data.data_val, sizeof(char), length, file);
 
         fclose(file);
         printf("Storing %s...\n", path);

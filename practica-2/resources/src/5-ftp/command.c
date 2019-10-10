@@ -99,7 +99,7 @@ ftp_write(CLIENT *clnt, ftp_param_t *param)
                 ftp_file_data.data.data_val = (char *) malloc(bytes_read);
 
                 /* Gather everything into a single data structure to send to the server */
-                ftp_file_data.data.data_val = strncpy(ftp_file_data.data.data_val, buffer, bytes_read);
+                ftp_file_data.data.data_val = buffer;
                 ftp_file_data.data.data_len = bytes_read;
                 ftp_file_data.name = (char *) malloc(PATH_MAX);
                 ftp_file_data.name = strcpy(ftp_file_data.name, dest);
