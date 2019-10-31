@@ -1,5 +1,5 @@
 /*
- * IfaceRemoteClass.java
+ * IfaceFTServer.java
  * Interface defining only one method which can be invoked remotely
  *
  */
@@ -11,7 +11,7 @@ import java.rmi.RemoteException;
 import java.nio.file.StandardOpenOption;
 
 /* This interface will need an implementing class */
-public interface IfaceRemoteClass extends Remote {
+public interface IfaceFTServer extends Remote {
 
       /* It will be possible to invoke this method from an application in other JVM */
       public byte[] read(String path, int pos, int bytes) throws RemoteException;

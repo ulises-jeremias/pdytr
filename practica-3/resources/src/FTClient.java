@@ -1,5 +1,5 @@
 /*
- * AskRemote.java
+ * Client.java
  * a) Looks up for the remote object
  * b) "Makes" the RMI
  */
@@ -18,7 +18,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
 
-public class AskRemote {
+public class FTClient {
         static Boolean verboseMode = false;
         static Boolean isSetBytesFlag = false;
         static Boolean listView = false;
@@ -29,7 +29,7 @@ public class AskRemote {
         static String dest = "";
         static String host = "";
 
-        public static void read(IfaceRemoteClass remote) {
+        public static void read(IfaceFTServer remote) {
                 try {
                         byte endFile = 0;
                         int position = initialPosition;
@@ -62,7 +62,7 @@ public class AskRemote {
                 }
         }
 
-        public static void write(IfaceRemoteClass remote) {
+        public static void write(IfaceFTServer remote) {
                 try {
                         RandomAccessFile file = new RandomAccessFile(Paths.get(src).toString(), "r");
                         FileDescriptor fd = file.getFD();
@@ -95,7 +95,7 @@ public class AskRemote {
                 }
         }
 
-        public static void list(IfaceRemoteClass remote) {
+        public static void list(IfaceFTServer remote) {
                 try {
                         String listReturn = remote.list(src, listView);
                         System.out.println(listReturn);
@@ -113,7 +113,7 @@ public class AskRemote {
 
                 /* Look for hostname and msg length in the command line */
                 if (argv.length < 1) {
-                        System.out.printf("Usage: AskRemote\n"
+                        System.out.printf("Usage: Client\n"
                                         + "\t- write --src <local> --dest <remote>: Add a file from <local> to <remote> \n"
                                         + "\t- add --src <local> --dest <remote>: Add a file from <local> to <remote>\n"
                                         + "\t- read --dest <local> --src <remote>: Store a file from <local> to <remote>\n"
@@ -136,9 +136,15 @@ public class AskRemote {
                 if (verboseMode)
                         System.out.println("Verbose mode activated");
 
-                if (src.isEmpty() && !(command.equals("ls") || command.equals("list"))) {
-                        System.err.println("Error: Specify a --src path");
-                        System.exit(1);
+                if (src.isEmpty()) {
+                        String[] commandsWithSrc = { "write", "add", "read", "get" };
+
+                        for (String commandWithSrc : commandsWithSrc) {
+                                if (command.equals(commandWithSrc)) {
+                                        System.err.println("Error: Specify a --src path");
+                                        System.exit(1);
+                                }
+                        }
                 }
 
                 if (dest.isEmpty()) {
@@ -153,7 +159,7 @@ public class AskRemote {
 
                 try {
                         String rname = "//" + host + ":" + Registry.REGISTRY_PORT + "/remote";
-                        IfaceRemoteClass remote = (IfaceRemoteClass) Naming.lookup(rname);
+                        IfaceFTServer remote = (IfaceFTServer) Naming.lookup(rname);
 
                         switch (command) {
                         case "read":
@@ -201,15 +207,22 @@ public class AskRemote {
                         case "time":
                                 startTime = System.nanoTime();
                                 remote.time();
-                                stopTime = System.nanoTime();
+                                endTime = System.nanoTime();
 
-                                System.out.println(stopTime - startTime);
+                                System.out.println(endTime - startTime);
                                 break;
 
                         case "timeout":
-                                System.out.println("timeout command...");
+                                if (verboseMode)
+                                        System.out.println("Running timeout command...");
+
                                 Boolean ret = remote.timeout();
-                                System.out.println(ret);
+
+                                if (ret)
+                                        System.out.println("Success!");
+                                else
+                                        System.out.println("Timeout exceeded :c");
+
                                 break;
 
                         default:

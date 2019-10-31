@@ -8,15 +8,13 @@
 import java.rmi.Naming;
 import java.rmi.registry.Registry;
 
-public class StartRemoteObject
-{
+public class StartRemoteObject {
 
-        public static void main (String args[])
-        {
+        public static void main(String args[]) {
                 try {
                         /* Create ("start") the object which has the remote method */
-                        RemoteClass robject = new RemoteClass();
-                /* Register the object using Naming.rebind(...) */
+                        FTServer robject = new FTServer();
+                        /* Register the object using Naming.rebind(...) */
                         String rname = "//localhost:" + Registry.REGISTRY_PORT + "/remote";
                         Naming.rebind(rname, robject);
                 } catch (Exception e) {

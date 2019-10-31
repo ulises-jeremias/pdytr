@@ -1,5 +1,5 @@
 /*
- * RemoteClass.java
+ * FTServer.java
  * Just implements the RemoteMethod interface as an extension to
  * UnicastRemoteObject
  *
@@ -22,11 +22,11 @@ import java.io.File;
 import java.io.IOException;
 
 /* This class implements the interface with remote methods */
-public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass {
+public class FTServer extends UnicastRemoteObject implements IfaceFTServer {
 
         private static final long serialVersionUID = 1L;
 
-        protected RemoteClass() throws RemoteException {
+        protected FTServer() throws RemoteException {
                 super();
         }
 
@@ -106,7 +106,9 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
                 try {
                         System.out.println("Processing timeout command...");
                         TimeUnit.MINUTES.sleep(6);
+                        System.out.println("Done!");
                 } catch (InterruptedException e) {
+                        System.err.println("Timeout exceeded");
                         return false;
                 }
 

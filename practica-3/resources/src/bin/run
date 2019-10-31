@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+has_param() {
+    local term="$1"
+    shift
+    for arg; do
+        if [[ $arg == "$term" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+. ./bin/flags/declares.sh
+
+variables["-s"]="samples"
+variables["-p"]="patience"
+variables["-o"]="output_path"
+
+. ./bin/flags/arguments.sh
+
+samples=${samples:-10}
+patience=${patience:-10}
+output_path=${output_path:-"times.dat"}
+
+SUMMARY_FILE="summary.csv"
+
+echo "Samples: $samples - patience: $patience"
+
+[ ! -d results ] && mkdir results
+echo > results/$output_path
+chmod 666 results/$output_path
+
+if has_param '--build' "$@"
+then
+  make compile
+fi
+
+make start &> /dev/null &
+sleep 3
+
+for ((i=1; i <= $samples; i++))
+do
+  echo -e "Running $i of $samples experiments"
+
+  java FTClient time >> results/$output_path
+  
+  if [ $? -eq 1 ]
+  then
+    for ((j=1; j <= $patience; j++ ))
+    do
+      echo -e "Retrying - n° $j"
+      java FTClient time >> results/$output_path
+      sleep 2
+    done
+    if [ "$?" -ne 1 ]
+    then
+      rm results/$output_path
+      exit 1
+    fi
+  fi
+  sleep 2
+done
+
+make stop
+make clean
+
+sd=`awk '{x+=$0;y+=$0^2}END{print sqrt(y/NR-(x/NR)^2)}' results/$output_path`
+mean=`awk '{for(i=1;i<=NF;i++)s+=$i}END{print s}' results/$output_path`
+
+if [[ ! -f "results/$SUMMARY_FILE" ]]; then
+  echo "mean, sd" > "results/$SUMMARY_FILE"
+  chmod 666 "results/$SUMMARY_FILE"
+fi
+
+echo "$mean, $sd" >> "results/$SUMMARY_FILE"
+echo ""
+echo "Runtimes at: ./results/$output_path - Summary: ./results/$SUMMARY_FILE"
