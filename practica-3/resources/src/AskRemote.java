@@ -198,6 +198,20 @@ public class AskRemote {
                                         System.out.printf("Took: %d ms\n", (endTime - startTime) / 1000000);
                                 break;
 
+                        case "time":
+                                startTime = System.nanoTime();
+                                remote.time();
+                                stopTime = System.nanoTime();
+
+                                System.out.println(stopTime - startTime);
+                                break;
+
+                        case "timeout":
+                                System.out.println("timeout command...");
+                                Boolean ret = remote.timeout();
+                                System.out.println(ret);
+                                break;
+
                         default:
                                 System.err.println("Command unavailable");
                                 break;

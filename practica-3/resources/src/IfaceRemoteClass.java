@@ -21,4 +21,10 @@ public interface IfaceRemoteClass extends Remote {
 
       /* It will be possible to invoke this method from an application in other JVM */
       public String list(String path, Boolean listView) throws RemoteException;
+
+      /* It will be possible to invoke this method from an application in other JVM */
+      public Boolean time() throws RemoteException;
+
+      /* It will be possible to invoke this method from an application in other JVM */
+      public Boolean timeout() throws RemoteException;
 }

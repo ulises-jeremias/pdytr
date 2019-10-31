@@ -98,6 +98,21 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
                 }
         }
 
+        public Boolean time() throws RemoteException {
+                return true;
+        }
+
+        public Boolean timeout() throws RemoteException {
+                try {
+                        System.out.println("Processing timeout command...");
+                        TimeUnit.MINUTES.sleep(6);
+                } catch (InterruptedException e) {
+                        return false;
+                }
+
+                return true;
+        }
+
         private void createFile(String directoryName, String fileName) throws IOException {
                 File directory = new File(directoryName);
 
