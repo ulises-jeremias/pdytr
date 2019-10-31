@@ -6,14 +6,17 @@
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
-import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.nio.file.StandardOpenOption;
-import java.io.IOException;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
+import java.util.Arrays;
 
 public class AskRemote {
         static Boolean verboseMode = false;
@@ -32,7 +35,7 @@ public class AskRemote {
                         int position = initialPosition;
 
                         while (endFile != 1) {
-                                byte[] fileContent = remote.read(src, position);
+                                byte[] fileContent = remote.read(src, position, 1024);
 
                                 endFile = fileContent[fileContent.length - 1];
                                 fileContent = Arrays.copyOf(fileContent, fileContent.length - 1);
@@ -47,30 +50,47 @@ public class AskRemote {
                         }
 
                         System.out.println("The file was successfully readed");
+                } catch (RemoteException e) {
+                        System.err.println("Connection error!");
+                        e.printStackTrace();
+                } catch (IOException e) {
+                        System.err.println("Error with local files");
+                        e.printStackTrace();
                 } catch (Exception e) {
+                        System.err.println("General exception!");
                         e.printStackTrace();
                 }
         }
 
         public static void write(IfaceRemoteClass remote) {
                 try {
-                        byte[] fileContent = Files.readAllBytes(Paths.get(src));
-                        byte[] partialContent;
+                        RandomAccessFile file = new RandomAccessFile(Paths.get(src).toString(), "r");
+                        FileDescriptor fd = file.getFD();
+                        FileInputStream fis = new FileInputStream(fd);
+                        byte[] partialContent = new byte[1024];
 
-                        int fileSize = fileContent.length;
-                        int bytesReaded = initialPosition;
+                        int bytesReaded;
 
                         StandardOpenOption openOption = StandardOpenOption.WRITE;
 
-                        while (bytesReaded < fileSize) {
-                                partialContent = Arrays.copyOfRange(fileContent, bytesReaded, fileSize);
-                                int writeReturn = remote.write(dest, partialContent, openOption);
+                        file.seek(initialPosition);
+
+                        while (fis.available() > 0) {
+                                bytesReaded = fis.read(partialContent, 0, Math.min(1024, fis.available()));
+                                remote.write(dest, partialContent, bytesReaded, openOption);
                                 openOption = StandardOpenOption.APPEND;
-                                bytesReaded += writeReturn;
                         }
 
+                        fis.close();
                         System.out.println("The file was correctly written");
+                } catch (RemoteException e) {
+                        System.err.println("Connection error!");
+                        e.printStackTrace();
+                } catch (IOException e) {
+                        System.err.println("Error with local files");
+                        e.printStackTrace();
                 } catch (Exception e) {
+                        System.err.println("General exception!");
                         e.printStackTrace();
                 }
         }
@@ -79,7 +99,11 @@ public class AskRemote {
                 try {
                         String listReturn = remote.list(src, listView);
                         System.out.println(listReturn);
+                } catch (RemoteException e) {
+                        System.err.println("Connection error!");
+                        e.printStackTrace();
                 } catch (Exception e) {
+                        System.err.println("General exception!");
                         e.printStackTrace();
                 }
         }
@@ -179,6 +203,7 @@ public class AskRemote {
                                 break;
                         }
                 } catch (Exception e) {
+                        System.err.println("General exception!");
                         e.printStackTrace();
                 }
         }

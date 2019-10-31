@@ -9,6 +9,9 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.RandomAccessFile;
+import java.io.FileInputStream;
+import java.io.FileDescriptor;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.nio.file.DirectoryStream;
@@ -29,35 +32,38 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
 
         /* Remote method implementation */
         @Override
-        public byte[] read(String path, int pos) throws RemoteException {
+        public byte[] read(String path, int pos, int bytes) throws RemoteException {
                 try {
-                        byte[] contents = Files.readAllBytes(Paths.get("store/" + path));
-                        int fileSize = contents.length;
+                        RandomAccessFile file = new RandomAccessFile(Paths.get(path).toString(), "r");
+                        FileDescriptor fd = file.getFD();
+                        FileInputStream fis = new FileInputStream(fd);
+
+                        file.seek(pos);
+
+                        byte[] contents = new byte[Math.min(bytes, fis.available())];
                         byte fileEnd = 1;
 
-                        contents = Arrays.copyOfRange(contents, pos, fileSize);
+                        fis.read(contents, 0, Math.min(bytes, fis.available()));
 
-                        if (contents.length > 1024) {
-                                contents = Arrays.copyOf(contents, 1024);
-                                fileEnd = 0;
-                        }
+                        fileEnd = (byte) (fis.available() == 0 ? 1 : 0);
+                        fis.close();
 
                         byte[] sizeAndContent = Arrays.copyOf(contents, contents.length + 1);
                         sizeAndContent[contents.length] = fileEnd;
 
                         return sizeAndContent;
                 } catch (Exception e) {
-                        System.out.println(e);
+                        System.err.println(e);
                         return new byte[0];
                 }
         }
 
         /* Remote method implementation */
         @Override
-        public int write(String path, byte[] data, StandardOpenOption openOption) throws RemoteException {
+        public int write(String path, byte[] data, int bytes, StandardOpenOption openOption) throws RemoteException {
                 try {
-                        if (data.length > 1024)
-                                data = Arrays.copyOf(data, 1024);
+                        if (data.length > bytes)
+                                data = Arrays.copyOf(data, bytes);
 
                         try {
                                 Files.write(Paths.get("store/" + path), data, openOption);
@@ -68,7 +74,7 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
 
                         return data.length;
                 } catch (Exception e) {
-                        System.out.println(e.toString());
+                        System.err.println(e.toString());
                         return -1;
                 }
         }
@@ -87,7 +93,7 @@ public class RemoteClass extends UnicastRemoteObject implements IfaceRemoteClass
 
                         return directoryPaths.substring(0, directoryPaths.length() - 1);
                 } catch (Exception e) {
-                        System.out.println(e);
+                        System.err.println(e);
                         return e.toString();
                 }
         }

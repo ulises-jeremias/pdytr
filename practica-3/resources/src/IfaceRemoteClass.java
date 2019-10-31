@@ -14,10 +14,10 @@ import java.nio.file.StandardOpenOption;
 public interface IfaceRemoteClass extends Remote {
 
       /* It will be possible to invoke this method from an application in other JVM */
-      public byte[] read(String path, int pos) throws RemoteException;
+      public byte[] read(String path, int pos, int bytes) throws RemoteException;
 
       /* It will be possible to invoke this method from an application in other JVM */
-      public int write(String path, byte[] data, StandardOpenOption openOption) throws RemoteException;
+      public int write(String path, byte[] data, int bytes, StandardOpenOption openOption) throws RemoteException;
 
       /* It will be possible to invoke this method from an application in other JVM */
       public String list(String path, Boolean listView) throws RemoteException;
