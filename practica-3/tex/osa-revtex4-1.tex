@@ -113,22 +113,12 @@ en la comunicación con tiempos de timeout.
 \section{Investigue porque con RMI puede generarse el problema de desconocimiento de clases en
 las JVM e investigue como se resuelve este problema.}
 
-\section{Implementar con RMI el mismo sistema de archivos remoto implementado con RPC en la
-práctica anterior:}
-
-\section{Investigue si es posible que varias invocaciones remotas estén ejecutándose
-concurrentemente y si esto es apropiado o no para el servidor de archivos del ejercicio
-anterior. En caso de que no sea apropiado, analice si es posible proveer una solución
-(enunciar/describir una solución, no es necesario implementarla). Nota: diseñe un
-experimento con el que se pueda demostrar fehacientemente que dos o más invocaciones
-remotas se ejecutan concurrentemente o no. Compare este comportamiento con lo que
-sucede con RPC.}
-
 En RMI puede ser que los métodos de un objeto remoto admitan como parámetros a otras clases y devuelvan clases.  Por lo que un metodo remoto podría devolver un objeto o admitir un parámetro de una clase desconocida para el cliente. En ese caso se podría generar una ClassNotFoundException
 Por ejemplo, puede ser un método así
 
 \begin{minted}{java}
-public IResult get(IParam arg) throws java.rmi.RemoteException
+public IResult get(IParam arg)
+throws java.rmi.RemoteException
 {
     ...
 }
@@ -138,18 +128,88 @@ public IResult get(IParam arg) throws java.rmi.RemoteException
 Una solucion sería que  tanto el servidor como el cliente tengan sus propias copias de las clases que implementen estas interfaces. Es decir, si ClaseResultado implementa InterfaceResultado y ClaseParametro implementa InterfaceParametro, tanto el cliente como el servidor deben tener en su CLASSPATH los ficheros ClaseResultado.class y ClaseParametro.class. Esto no sería una solucion deseada, ya que se deben saber todas las clases que utiliza el servidor y copiarlas del lado del cliente, quitando dinamismo y escalabilidad a rmi.
 La solución provista por RMI es instalar \textit{RMISecurityManager}, el cual habilita la carga dinámica de clases. De esta forma el servidor no necesita tener una copia de ClaseParametro.class ni el cliente una copia de ClaseResultado.class. 
 
+\section{Implementar con RMI el mismo sistema de archivos remoto implementado con RPC en la
+práctica anterior:}
+
+Para esto se utilizó la estructura de archivos del ejemplo. Se definió
+una interfaz con 3 métodos, \textit{read}, \textit{write} y
+\textit{list} \\
+
+Tanto el cliente como el servidor, se alimentan de la interfaz definida
+en IfaceFTServer donde la clase que los implementa es la clase FTServer.
+
+Luego, se implementa un cliente que interactúe contra el servidor, con
+los comandos basicos, nombrados anteriormente. Esto se hizo en la clase
+FTClient. El servidor, utiliza la implementación de la clase FTServer, y
+corre instanciando un objeto de la clase StartRemoteObject.
+
+\section{Investigue si es posible que varias invocaciones remotas estén ejecutándose
+concurrentemente y si esto es apropiado o no para el servidor de archivos del ejercicio
+anterior. En caso de que no sea apropiado, analice si es posible proveer una solución
+(enunciar/describir una solución, no es necesario implementarla). Nota: diseñe un
+experimento con el que se pueda demostrar fehacientemente que dos o más invocaciones
+remotas se ejecutan concurrentemente o no. Compare este comportamiento con lo que
+sucede con RPC.}
+
+Al funcionar sobre Java, RMI admite concurrencia nativa. Sin embargo,
+el principal inconveniente en RMI, es que no maneja multihilos de manera
+segura, es decir, los llamados pueden causar colisiones en los recursos
+del servidor. 
+Para evitar esto, se pueden utilizar mecanismos conocidos para sincronización,
+aunque RMI no provee ninguno por su cuenta. \\
+
+En la presente implementación, se cuenta con 2 comandos seguros para la concurrencia,
+\textit{read} y \textit{list}, y el comando \textit{write} el cual no lo es. \\
+
+El principal inconveniente que puede traer la ejecución de comandos no seguros, es
+la perdida de datos en el servidor.
+
+Para demostrar la concurrencia de RMI, se utilizó un comando extra, para
+mayor simplicidad del experimento. En este caso, el método remoto solamente
+genera un sleep de 6 minutos. El experimento puede ser la ejecución de este comando por dos clientes
+interactuando con el mismo servidor.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{concu}
+    \caption{Experimento de concurrencia en servidor}.
+    \label{figure:concu}
+\end{figure}
+
 \section{Tiempos de respuesta de una invocación:}
 
 \subsection{Diseñe un experimento que muestre el tiempo de respuesta mínimo de una invocación con
 JAVA RMI. Muestre promedio y desviación estándar de tiempo respuesta.}
 
+Se realizan 10 experimentos en los cuales se ejecuta el comando \textit{time} del cliente y se almacenan
+los tiempos, en milisegundos, impresos en un archivo. Para esto se utiliza la misma instancia del proceso servidor. \\
+
+Se puede volver a generar el archivo corriendo el script \textit{./bin/run --build [-s X] [-p Y] [-o PATH]}
+el cual acepta como parametro $X$ la cantidad de iteraciones, como parametro $Y$ la cantidad de reintentos en caso de error de conexión y como parámetro \textit{PATH} el nombre de archivo donde dejar los valores.
+
+La desviación estandar obtenida es 17579823 y la media es 657661.
+
 \subsection{Investigue los timeouts relacionados con RMI. Como mínimo, verifique si existe un timeout
 predefinido. Si existe, indique de cuanto es el tiempo y si podría cambiarlo. Si no existe,
 proponga alguna forma de evitar que el cliente quede esperando indefinidamente.}
 
+El paquete \textbf{java.rmi} no cuenta con timeout configurable,
+se puede utilizar el paquete \textbf{sun.rmi}, el cual cuenta con una
+propiedad configurable de timeout.
+
+De no utilizarse \textbf{sun.rmi}, se pueden llegar a trabajar con algun
+timer o algo similar, pero no hay ninguna herramienta que nos brinde 
+\textbf{java.rmi} para dicho fin.
+
 \section{Apéndice}
 
-\subsection{Coulouris-Dollimore-Kindberg} \label{apendix:1a}
+\subsection{Coulouris-Dollimore-Kindberg}
+\label{apendix:1a}
 
+Access transparency. Enables local and remote resources to be
+accessed using identical operations They both offer a similar level
+of transparency that is, local and remote calls employ the same
+syntax but remote interfaces typically expose the distributed nature
+of the underlying call, for example by supporting remote exceptions
 
 \end{document}

@@ -1,4 +1,0 @@
-public IResult get(IParam arg) throws java.rmi.RemoteException
-{
-    ...
-}

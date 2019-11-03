@@ -1,0 +1,9 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{struct} \PYG{n}{timeval} \PYG{n}{tv}\PYG{p}{;}
+\PYG{n}{CLIENT} \PYG{o}{*}\PYG{n}{clnt}\PYG{p}{;}
+
+\PYG{n}{tv}\PYG{p}{.}\PYG{n}{tv\PYGZus{}sec} \PYG{o}{=} \PYG{l+m+mi}{60}\PYG{p}{;}	
+\PYG{n}{tv}\PYG{p}{.}\PYG{n}{tv\PYGZus{}usec} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+
+\PYG{n}{clnt\PYGZus{}control}\PYG{p}{(}\PYG{n}{clnt}\PYG{p}{,} \PYG{n}{CLSET\PYGZus{}TIMEOUT}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{tv}\PYG{p}{);}
+\end{Verbatim}

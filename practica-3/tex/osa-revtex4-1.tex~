@@ -34,265 +34,181 @@
 
 \maketitle %% required
 
-\section{Para los ejemplos de RPC proporcionados (*.tar, analizar en el orden dado a los nombres de
-los archivos):}
+\section{Utilizando como base el programa ejemplo de RMI:}
 
-\subsection{Mostrar cómo serían los mismos procedimientos si fueran locales, es decir haciendo el
-proceso inverso del realizado en la clase de explicación de RPC.}
+\subsection{Analice si RMI es de acceso completamente transparente (access transparency, tal como 
+está definido en Coulouris-Dollimore-Kindberg). Justifique.}
 
-Si los procesos fueran todos locales, la programación de los mismos resultaria en una compilación de uno o más ".c" con una única función \textit{main} y un único binario ejecutable. En el ejemplo provisto se puede observar como todo el código del programa se encuentra en un único ".c", como se describe anteriormente.
+\textit{Ver definición de transparency según Coulouris-Dollimore-Kindberg en la sección \ref{apendix:1a}} \\
 
-En este caso no habría latencia en la comunicación dado que no existiría tal comunicacón. Al no definirse un modelo cliente/servidor, ya no existiría una comunicación entre hosts y todos los llamados a funciones se realizarían en el mismo espacio de direcciones.
+Dada la sintaxis y nomenclatura de las operaciones definidas, no es sensillo definir si las mismas
+serán operaciones locales o remotas. Sin embargo, se debe realizar un lookup del nombre de las clases
+en momento de invocacion de las mismas teniendo en cuenta el host remoto, pues no están en el
+espacio de nombres local.
 
-\subsection{Ejecutar los procesos y mostrar la salida obtenida (del “cliente” y del “servidor”) en cada
-uno de los casos.}
+Esto nos indica que, si bien a nivel de métodos no tenemos forma a priori de determinar si una
+operación es local o remota, pues no hay real diferencia en la invocación de una u otra,
+si la hay al momento de obtener la clase remota.
 
-Las capturas se muestran a continuación:
+Además, se tiene en cuenta el manejo de errores dados en la comunicación dado que el método
+remoto tiene a fallar con mayor frecuencia que el método local por fallas en la comunicación. \\
 
-\subsubsection{Simple}
+Por lo tanto, RMI ofrece transparencia de acceso al permitir invocar de la misma forma un procedimiento
+local y uno remoto. Sin embargo, la transparencia es parcial dado que se tienen en cuenta
+otras cuestiones como el lookup de las clases remotas y errores en la comunicación.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-client}
-    \caption{Salida de la ejecución del cliente dados los parámetros \textit{localhost}, \textit{3} y \textit{2}}.
-    \label{figure:1-simple-client}
-\end{figure}
+\subsection{Enumere los archivos .class que deberían estar del lado del cliente y del lado del servidor y
+que contiene cada uno.}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-server}
-    \caption{Salida de la ejecución del servidor.}
-    \label{figure:1-simple-server}
-\end{figure}
-
-\subsubsection{U1}
-
-La ejecución del servidor no tiene salida al momento de resolver una consulta del cliente.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/2-u1-client}
-    \caption{Salida de la ejecución del cliente dados los parámetros \textit{localhost} y \textit{3}}.
-    \label{figure:2-u1-client}
-\end{figure}
-
-\subsubsection{Array}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/3-array-client}
-    \caption{Salida de la ejecución del cliente dados los parámetros \textit{localhost}, $8$, $3$, $5$, $9$ y $2$}.
-    \label{figure:3-array-client}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/3-array-server}
-    \caption{Salida de la ejecución del servidor.}
-    \label{figure:3-array-server}
-\end{figure}
-
-\subsubsection{List}
-
-La ejecución del servidor no tiene salida al momento de resolver una consulta del cliente.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/4-list-client}
-    \caption{Salida de la ejecución del cliente dados los parámetros \textit{localhost}, $8$, $3$, $5$, $9$ y $2$}.
-    \label{figure:4-list-client}
-\end{figure}
-
-\subsection{Mostrar experimentos donde se produzcan errores de conectividad del lado del cliente y
-del lado del servidor. Si es necesario realice cambios mínimos para, por ejemplo, incluir
-sleep() o exit(), de forma tal que no se reciban comunicaciones o no haya receptor para
-las comunicaciones. Verifique con UDP y con TCP.}
-
-En ambos casos se modifica la implementación de la función \mintinline{c}{int *add_1_svc(operands *argp, struct svc_req *rqstp);} en el archivo \textit{simpservice.c}. Es decir, la implementación del proceso servidor, agregando un sleep o exit, según corresponda, respectivamente.
-
-\subsubsection{UDP}
-  Agregando un llamado a la función \textbf{exit}, el proceso servidor termina en medio de la operación, (\textit{ver fig. \ref{figure:1-simple-server-udp-exit}}) por lo que el cliente termina la comunicación cuando finaliza el timeout definido en su proceso, (\textit{ver fig. \ref{figure:1-simple-client-udp-exit}}).
-  
-  Lo mismo pasa si el servidor tarda mucho en procesar lo pedido y responder, cosa que se simula agregando un llamadao a la función \textbf{sleep} dentro del proceso servidor. Cuando el sleep tiene una duración mayor a la del timeout definido en el cliente, el servidor no da su respuesta antes del timeout y el cliente cierra la conexión, (\textit{ver fig. \ref{figure:1-simple-client-udp-sleep}}). En este caso, el servidor continuará su ejecución esperando el proximo request, (\textit{ver fig. \ref{figure:1-simple-server-udp-sleep}}).
-  
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-server-udp-exit}
-    \caption{Salida de la ejecución del service utilizando UDP y la función exit.}.
-    \label{figure:1-simple-server-udp-exit}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-client-udp-exit}
-    \caption{Salida de la ejecución del cliente utilizando UDP.}.
-    \label{figure:1-simple-client-udp-exit}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-server-udp-sleep}
-    \caption{Salida de la ejecución del service utilizando UDP y la función sleep.}.
-    \label{figure:1-simple-server-udp-sleep}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-client-udp-sleep}
-    \caption{Salida de la ejecución del cliente utilizando UDP.}.
-    \label{figure:1-simple-client-udp-sleep}
-\end{figure}
-
-\subsection{TCP}
-
-El resultado es exactamente el mismo que el descripto anteriormente en el caso de UDP, cuando el servidor termina cuando se agrega el \textbf{exit}, (\textit{ver figs. \ref{figure:1-simple-server-tcp-exit} y \ref{figure:1-simple-client-tcp-exit}}) y cuando tarda mas de lo debido con la función \textbf{sleep}, (\textit{ver figs. \ref{figure:1-simple-server-tcp-sleep} y \ref{figure:1-simple-client-tcp-sleep}}).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-server-tcp-exit}
-    \caption{Salida de la ejecución del service utilizando TCP y la función exit.}.
-    \label{figure:1-simple-server-tcp-exit}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-client-tcp-exit}
-    \caption{Salida de la ejecución del cliente utilizando TCP.}.
-    \label{figure:1-simple-client-tcp-exit}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-server-tcp-sleep}
-    \caption{Salida de la ejecución del service utilizando TCP y la función sleep.}.
-    \label{figure:1-simple-server-tcp-sleep}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/1-simple-client-tcp-sleep}
-    \caption{Salida de la ejecución del cliente utilizando TCP.}.
-    \label{figure:1-simple-client-tcp-sleep}
-\end{figure}
-
-\section{Describir/analizar las opciones a) - N b) -M y - A, verificando si se pueden utilizar estas opciones y comentar que puede ser necesario para tener procesamiento concurrente del “lado del cliente” y del “lado del servidor” con la versión
-utilizada de rpcgen. Una lista completa de opciones se describe en
-http://download.oracle.com/docs/cd/E19683-01/816-1435/rpcgenpguide-1939/index.html}
-
-\subsection{}
-El flag -N intenta de generar código en un estándar más nuevo que el ANSI (flag -C).
-Al intentar compilar el código con ese flag, utilizando el código original, falla.
-Esto se debe a que rcpgen, genera un .h las funciones con el tipo SIN puntero, a diferencia del flag -C, que los genera como punteros a operand.
-
-\subsection{}
-El flag -M sirve para generar código seguro para la concurrencia, utilizando un paŕametro extra al servicio, de tipo int *. \\
-El flag -A, es la configuracion por default, que dependiendo el sistema en el que se compila, va a ser (o no), seguro para la concurrencia multihilo.
-
-\section{Analizar la transparencia de RPC en cuanto al manejo de parámetros de los procedimientos
-remotos. Considerar lo que sucede en el caso de los valores de retorno. Puede aprovechar los
-ejemplos provistos.}
-
-rpcgen utiliza la estructura definida en el archivo ".x" para generar estructuras C en ambos puntos (cliente y servidor), con las cuales va a trabajar casteando. \\
-
-El servicio recibe punteros a estas estructuras, las cuales va a trabajar y retornar nuevamente casteando a (caddr\_t), el cual es equivalente a un \mintinline{c}{void *}.
-
-Esto nos permite trabajar con cualquier tipo de C, siempre volviendo a castear a la estructura definida a partir del ".x".
-
-\section{Con la finalidad de contar con una versión muy restringida de un sistema de archivos remoto, en el cual se puedan llevar a cabo las operaciones enunciadas informalmente como:}
+\textit{A continuación se enumeran los archivos .class con información de cada uno de ellos:}
 
 \begin{itemize}
-  \item \textbf{leer}: dado un nombre de archivo, una posición y una cantidad de bytes a leer, retorna 1) los bytes efectivamente leídos desde la posición pedida y la cantidad pedida en caso de ser posible, y 2) la cantidad de bytes que efectivamente se retornan leídos.
-  
-  \item \textbf{escribir}: dado un nombre de archivo, una cantidad de bytes determinada, y un buffer a partir del cual están los datos, se escriben los datos en el archivo dado. Si el archivo existe, los datos se agregan al final, si el archivo no existe, se crea y se le escriben los datos. En todos los casos se retorna la cantidad de bytes escritos.
+    \item \textbf{AskRemote.class}
+    
+    Este archivo presente en el cliente identifica a la clase Cliente 
+    que realiza el llamado al método remoto. Contiene información de conexión al servidor (\textit{hostname}, \ldots),
+    invocacion a la clase y método remoto.
+
+    \item \textbf{StartRemoteObject.class}
+    
+    En este archivo dispuesto en el servidor se define la clase encargada de instanciar a la clase contenedora de los métodos remotos a invocar y la registra
+    en el espacio de nombres asegurándose que pueda ser llamada por el cliente.
+
+    \item \textbf{IfaceRemoteClass.class}
+    
+    Este archivo se dispone del lado del servidor y contiene la declaración de la interface en la cual
+    se definen los métodos que el servidor debe implementar para que puedan ser invocados.
+
+    \item \textbf{RemoteClass.class}
+    
+    En este archivo dispuesto del lado del servidor se encuentra la implementación de los métodos definidos en la
+    interface anteriormente mencionada, \textit{IfaceRemoteClass}, para que puedan
+    ser invocados remotamente. Extiende de \textit{UnicastRemoteObject} que hace que toda la comunicación
+    sea completamente transparente al programador de este lado.
 \end{itemize}
 
+\section{Identifique similitudes y diferencias entre RPC y RMI.}
 
-\subsection{Defina e implemente con RPC un servidor. Documente todas las decisiones tomadas.}
+La principal diferencia entre RPC y RMI radica en el paradigma, y esto
+se debe a que RMI involucra objetos.
+En lugar de llamar procedimientos de forma remota, se llaman a métodos de
+objetos remotos. \textit{Se podría afirmar que RMI es la version orientada a objetos
+de RPC.} En RMI cada objeto tiene una referencia única en todo el sistema,
+tanto si los objetos son remotos como locales, permitiendo así el pasó de
+objetos como parámetros, herencia y relaciones entre objetos remotos,
+ofreciendo un pasaje de parámetros con una mayor riqueza semántica y un
+mayor nivel de abstracción que en RPC, donde solo se pueden pasar
+parámetros por valor.
 
-\subsection{Implemente un cliente RPC del servidor anterior que copie un archivo del sistema de
-archivos del servidor en el sistema de archivos local y genere una copia del mismo archivo
-en el sistema de archivos del servidor. En todos los casos se deben usar las operaciones
-de lectura y escritura del servidor definidas en el item anterior, sin cambios específicos
-del servidor para este item en particular. Al finalizar la ejecución del cliente deben quedar
-tres archivos en total: el original en el lado del servidor, una copia del original en el lado
-del cliente y una copia en el servidor del archivo original. El comando diff no debe
-identificar ninguna diferencia entre ningún par de estos tres archivos.}
+Sin embargo, en ambos modelos los detalles de implementación están ocultos al usuario
+y los métodos o procesos disponibles se conocen a través de una interfaz
+que provee el servidor.
 
-Para este punto, se implementaron las funciones básicas, \texttt{write}, \texttt{read} y \texttt{list}
+Ambos ofrecen un alto nivel de transparencia de acceso, donde los llamadas remotas
+y locales poseen la misma sintáxis, pero las interfaces remotas
+diferencian la naturaleza distribuida de las llamadas remotas al, por
+ejemplo, soportar excepciones remotas o tener en cuenta posibles fallas
+en la comunicación con tiempos de timeout.
 
-Como primera instancia, se define el archivo \texttt{.x} de la siguiente forma:
+\section{Investigue porque con RMI puede generarse el problema de desconocimiento de clases en
+las JVM e investigue como se resuelve este problema.}
 
-\inputminted[mathescape]{c}{../resources/src/5-ftp/ftp.x}
+En RMI puede ser que los métodos de un objeto remoto admitan como parámetros a otras clases y devuelvan clases.  Por lo que un metodo remoto podría devolver un objeto o admitir un parámetro de una clase desconocida para el cliente. En ese caso se podría generar una ClassNotFoundException
+Por ejemplo, puede ser un método así
 
-Se busco manejar cualquier tipo de archivos, por eso el uso del tipo opaque.
-
-Luego se definieron el cliente junto a los comandos disponibles.
-
-Con el objetivo de mejorar la legibilidad del codigo, se opto por utilizar un arreglo de estructuras con punteros a funciones para diferenciar rapidamente los comandos.
-
-El parseo de los argumentos al cliente cuenta con 2 etapas, la primera busca algun comando valido, y se realiza a recorriendo manualmente \texttt{argv}. \\
-La segunda busca las flags posibles para los comandos, esto se hizo usando la libreria \texttt{getopt} para mayor facilidad.
-
-La conexion con el servidor tuvo que ser obligatoriamente del tipo \textbf{TCP} para soportar los grandes volumenes de datos.
-
-
-\section{Timeouts en RPC:}
-
-\subsection{Desarrollar un experimento que muestre el timeout definido para las llamadas RPC y el
-promedio de tiempo de una llamada RPC.}
-
-Para el experimento del timeout usaremos el caso 1-simple. 
-Vemos que si ponemos en el proceso servidor un delay de 25 mediante un sleep(25) en el medio de la comunicación:
-
-Entonces la comunicación se realiza exitosamente y la llamada al proceso remoto termina de forma correcta.
-
-En cambio si ponemos en el proceso servidor un delay de 26 mediante un sleep(26) en el medio de la comunicación.
-
-Entonces la comunicación se corta por parte del cliente y la llamada no se completa. (\textit{Ver fig. \ref{figure:6-sleep-timeout-25}}).
-
-Mediante estos resultados podemos afirmar que el timeout definido en el proceso cliente es el 25 segundos, por los que si el proceso servidor o la comunicación tardan más de ese tiempo entonces el cliente finalizará la comunicación abruptamente dando por sentado una falla en la misma.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{capturas/6-sleep-timeout-25}
-    \caption{Tiempos de ejecución calculados al momento de alcanzar el timeout}.
-    \label{figure:6-sleep-timeout-25}
-\end{figure}
-
-\subsection{Reducir el timeout de las llamadas RPC a un 10\% menos del promedio encontrado
-anteriormente. Mostrar y explicar el resultado para 10 llamadas.}
-
-Luego de enviar una solicitud al servidor, un proceso cliente espera un período default de 25 segundos para recibir una respuesta. Este valor puede ser modificado utilizando la rutina \mintinline{c}{clnt_control()}.
-
-Usando una estructura timeval, se puede configurar los segundos que se deseen para el timeout del cliente se la siguiente forma:
-
-\begin{minted}{c}
-struct timeval tv;
-CLIENT *clnt;
-
-tv.tv_sec = 60;	
-tv.tv_usec = 0;
-
-clnt_control(clnt, CLSET_TIMEOUT, &tv);
+\begin{minted}{java}
+public IResult get(IParam arg)
+throws java.rmi.RemoteException
+{
+    ...
+}
 \end{minted}
 
 
-Teniendo en cuenta esto, se prueba con un timeout de 10 segundos, realizando el experimento anterior nuevamente 10 veces obteniendo el siguiente resultado. (\textit{Ver fig. \ref{figure:6-sleep-timeout-10}}).
+Una solucion sería que  tanto el servidor como el cliente tengan sus propias copias de las clases que implementen estas interfaces. Es decir, si ClaseResultado implementa InterfaceResultado y ClaseParametro implementa InterfaceParametro, tanto el cliente como el servidor deben tener en su CLASSPATH los ficheros ClaseResultado.class y ClaseParametro.class. Esto no sería una solucion deseada, ya que se deben saber todas las clases que utiliza el servidor y copiarlas del lado del cliente, quitando dinamismo y escalabilidad a rmi.
+La solución provista por RMI es instalar \textit{RMISecurityManager}, el cual habilita la carga dinámica de clases. De esta forma el servidor no necesita tener una copia de ClaseParametro.class ni el cliente una copia de ClaseResultado.class. 
+
+\section{Implementar con RMI el mismo sistema de archivos remoto implementado con RPC en la
+práctica anterior:}
+
+Para esto se utilizó la estructura de archivos del ejemplo. Se definió
+una interfaz con 3 métodos, \textit{read}, \textit{write} y
+\textit{list} \\
+
+Tanto el cliente como el servidor, se alimentan de la interfaz definida
+en IfaceFTServer donde la clase que los implementa es la clase FTServer.
+
+Luego, se implementa un cliente que interactúe contra el servidor, con
+los comandos basicos, nombrados anteriormente. Esto se hizo en la clase
+FTClient. El servidor, utiliza la implementación de la clase FTServer, y
+corre instanciando un objeto de la clase StartRemoteObject.
+
+\section{Investigue si es posible que varias invocaciones remotas estén ejecutándose
+concurrentemente y si esto es apropiado o no para el servidor de archivos del ejercicio
+anterior. En caso de que no sea apropiado, analice si es posible proveer una solución
+(enunciar/describir una solución, no es necesario implementarla). Nota: diseñe un
+experimento con el que se pueda demostrar fehacientemente que dos o más invocaciones
+remotas se ejecutan concurrentemente o no. Compare este comportamiento con lo que
+sucede con RPC.}
+
+Al funcionar sobre Java, RMI admite concurrencia nativa. Sin embargo,
+el principal inconveniente en RMI, es que no maneja multihilos de manera
+segura, es decir, los llamados pueden causar colisiones en los recursos
+del servidor. 
+Para evitar esto, se pueden utilizar mecanismos conocidos para sincronización,
+aunque RMI no provee ninguno por su cuenta. \\
+
+En la presente implementación, se cuenta con 2 comandos seguros para la concurrencia,
+\textit{read} y \textit{list}, y el comando \textit{write} el cual no lo es. \\
+
+El principal inconveniente que puede traer la ejecución de comandos no seguros, es
+la perdida de datos en el servidor.
+
+Para demostrar la concurrencia de RMI, se utilizó un comando extra, para
+mayor simplicidad del experimento. En este caso, el método remoto solamente
+genera un sleep de 6 minutos. El experimento puede ser la ejecución de este comando por dos clientes
+interactuando con el mismo servidor.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{capturas/6-sleep-timeout-10}
-    \caption{Tiempos de ejecución calculados al momento de alcanzar el timeout}.
-    \label{figure:6-sleep-timeout-10}
+    \includegraphics[width=0.5\textwidth]{concu}
+    \caption{Experimento de concurrencia en servidor}.
+    \label{figure:concu}
 \end{figure}
 
+\section{Tiempos de respuesta de una invocación:}
 
-\subsection{Desarrollar un cliente/servidor RPC de forma tal que siempre se supere el tiempo de
-timeout. Una forma sencilla puede utilizar el tiempo de timeout como parámetro del
-procedimiento remoto, donde se lo utiliza del lado del servidor en una llamada a sleep(),
-por ejemplo.}
+\subsection{Diseñe un experimento que muestre el tiempo de respuesta mínimo de una invocación con
+JAVA RMI. Muestre promedio y desviación estándar de tiempo respuesta.}
 
-En la estructura cliente/servidor generada, se recibe como argumento un tiempo el cual define el timeout del cliente y se envia al servidor para que este haga un sleep con el cuadrado de ese tiempo para que siempre se genere un timeout.
+Se realizan 10 experimentos en los cuales se ejecuta el comando \textit{time} del cliente y se almacenan
+los tiempos impresos en un archivo. Para esto se utiliza la misma instancia del proceso servidor. \\
 
+Se puede volver a generar el archivo corriendo el script \textit{./bin/run --build [-s X] [-p Y] [-o PATH]}
+el cual acepta como parametro $X$ la cantidad de iteraciones, como parametro $Y$ la cantidad de reintentos en caso de error de conexión y como parámetro \textit{PATH} el nombre de archivo donde dejar los valores.
+
+La desviación estandar obtenida es 17579823 y la media es 657661.
+
+\subsection{Investigue los timeouts relacionados con RMI. Como mínimo, verifique si existe un timeout
+predefinido. Si existe, indique de cuanto es el tiempo y si podría cambiarlo. Si no existe,
+proponga alguna forma de evitar que el cliente quede esperando indefinidamente.}
+
+El paquete \textbf{java.rmi} no cuenta con timeout configurable,
+se puede utilizar el paquete \textbf{sun.rmi}, el cual cuenta con una
+propiedad configurable de timeout.
+
+De no utilizarse \textbf{sun.rmi}, se pueden llegar a trabajar con algun
+timer o algo similar, pero no hay ninguna herramienta que nos brinde 
+\textbf{java.rmi} para dicho fin.
+
+\section{Apéndice}
+
+\subsection{Coulouris-Dollimore-Kindberg} \label{apendix:1a}
+
+Access transparency. Enables local and remote resources to be
+accessed using identical operations They both offer a similar level
+of transparency that is, local and remote calls employ the same
+syntax but remote interfaces typically expose the distributed nature
+of the underlying call, for example by supporting remote exceptions
 
 \end{document}
