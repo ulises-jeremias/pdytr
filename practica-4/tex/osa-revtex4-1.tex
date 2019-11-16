@@ -1,0 +1,48 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         File: osa-revtex4-1.tex                             %
+%                        Date: April 15, 2013                                 %
+%                                                                             %
+%                              BETA VERSION!                                  %
+%                   JOSA A, JOSA B, Applied Optics, Optics Letters            %
+%                                                                             %
+%            This file requires the substyle file osajnl4-1.rtx,              %
+%                   running under REVTeX 4.1 and LaTeX 2e                     %
+%                                                                             %
+%                   USE THE FOLLOWING REVTeX 4-1 OPTIONS:                     %
+% \documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1}%
+%                    %% Use 11pt for Applied Optics                           %
+%                                                                             %
+%               (c) 2013 The Optical Society of America                       %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[osajnl,twocolumn,showpacs,superscriptaddress,10pt]{revtex4-1} %% use 11pt for Applied Optics
+%\documentclass[osajnl,preprint,showpacs,superscriptaddress,11pt]{revtex4-1} %% use 12pt for preprint option
+\usepackage{amsmath,nccmath,amssymb,graphicx,float,minted,xparse,tikz}
+\usepackage[utf8]{inputenc}
+\graphicspath{{images/}}
+
+\usepackage{mathtools,enumitem}
+\usepackage{minted}
+
+\begin{document}
+
+\title{Programación Distribuida y Tiempo Real}
+
+\author{Ulises Jeremias Cornejo Fandos}
+\affiliation{Licenciatura en Informática, Facultad de Informática, UNLP}
+
+\maketitle %% required
+
+\section{Programar un agente para que periódicamente recorra una secuencia de computadoras y reporte al lugar de origen}
+
+\begin{enumerate}[label=\alph* -]
+  \item El tiempo total del recorrido para recolectar la información
+  \item La carga de procesamiento de cada una de ellas.
+  \item La cantidad de memoria total disponible.
+  \item Los nombres de las computadoras.
+\end{enumerate}
+
+
+
+\end{document}
