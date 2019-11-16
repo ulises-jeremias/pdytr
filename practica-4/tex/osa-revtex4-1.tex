@@ -36,13 +36,114 @@
 
 \section{Programar un agente para que periódicamente recorra una secuencia de computadoras y reporte al lugar de origen}
 
-\begin{enumerate}[label=\alph* -]
+\begin{enumerate}[label=\alph*)]
   \item El tiempo total del recorrido para recolectar la información
   \item La carga de procesamiento de cada una de ellas.
   \item La cantidad de memoria total disponible.
   \item Los nombres de las computadoras.
 \end{enumerate}
 
+Para este ejercicio se crea un agente el cual crea 10 containers, y agrega
+sus ID a una lista de tipo \texttt{ArrayList} con el fin de recordar los mismos,
+agregando al final al container inicial.
 
+Luego simplemente se itera sobre la lista, juntando la información
+del container en el que se encuentra. Para almacenar la información, se
+creo una clase anidada (\texttt{ContainerInfo}) la cual se utiliza para que, una vez
+conseguida la información se almacene en otra lista de tipo \texttt{ArrayList}.
+Al terminar la iteración, tenemos acceso al container origen, con
+una lista de instancias de \texttt{ContainerInfo}.
+
+Luego se recorre esa lista imprimiendo la información correspondiente. \\
+
+Para ejecutar, se debe levantar el \texttt{jade.Boot}, esto se puede hacer
+mediante el comando \textit{make}.
+
+Simplemente se puede ejecutar \texttt{make start-gui}
+Luego, para ejecutar la implementación para este ejercicio,
+se puede ejcutar \texttt{make run-ex1}
+
+\section{Programe un agente para que calcule la suma de todos los números
+almacenados en un archivo de una computadora que se le pasa como
+parámetro. Comente cómo se haríalo mismo con una aplicación
+cliente/servidor. Comente que pasaría si hubiera otros sitios con
+archivos que deben ser procesados de manera similar}
+
+Para este ejercicio, se programa un agente que recibe el nombre de una computadora,
+y migra el agente.
+Una vez en la computadora destino, se realiza la lectura del archivo,
+junto con la suma.
+Al finalizar, se retora al container origen, y se muestra el resultado.\\
+
+Para ejecutar, se debe levantar el \texttt{jade.Boot}, esto se puede hacer
+mediante el comando \textit{make}.
+
+Simplemente se puede ejecutar \textit{make start-gui}
+Luego, para ejecutar la implementación del ejercicio,
+se puede ejcutar \texttt{make run-ex2}. \\
+
+Para realizar una implementación similar en el modelo cliente/servidor, el servidor debe poder acceder
+al filesystem del cliente. De poder hacer, puede copiarlo y trabajarlo
+localmente, para retornan un valor final.
+
+De no poder acceder al filesystem, se puede trabajar exponiendo un
+servicio que acepte un archivo, y retorne su suma.
+
+De todas formas, la interacción puede llegar a ser un poco menos directa,
+aunque más simple.
+
+\section{Defina  e  implemente  con  agentes  un  sistema  de  archivos
+distribuido  similar  al  de  las prácticas anteriores.}
+
+Para este punto, se programa un agente que pueda recibir argumentos, y
+en base a lo recibido, realiza diferentes acciones.
+
+Al ser métodos java, se reutiliza gran parte del la lógica de la
+práctica anterior.
+
+El agente comprende 3 acciones:
+
+\begin{itemize}
+      \item list: La acción más simple. Recibe un parámetro extra a la acción,
+            que marca cual es el directorio a listar.
+            Una vez parseados los argumentos, se realiza la migración al servidor
+            (recordemos que nos encontramos en el cliente).
+            Al terminar la migración, se leen los archivos del directorio, y se
+            almcenan en una variable de instancia del agente. Luego se vuelve al
+            cliente y se informa lo leído.\\
+
+      \item read: Recibe 2 argumentos extra a la acción, que marcan el nombre del
+            nuevo archivo y el nombre del archivo remoto (en ese orden)
+            Una vez parseados los argumentos, se realiza la migración al serviodr.
+            Al termionar la migración, se leen los primeros 2000 bytes del archivo,
+            y el tamaño total del archivo a leer y se almacenan en variables de instancia.
+            En el cliente, se realiza la copia de los 2000 bytes, y se consulta si el
+            tamaño total del archivo es menor o igual al tamaño copiado (en la primer
+            vuelta va a ser igual a 2000), de no ser asi, se suman a una variable de
+            \texttt{bytes copiados}, y se realiza la migración al servidor.
+            En el servidor se copian los siguientes 2000 bytes \texttt{a partir}
+            de los bytes copiados.(Esta acción se repite tantas veces como 
+            sea necesaria)\\
+      
+      \item write: Trabaja de igual manera que el read, pero a manera inversa,
+            siendo el cliente del item anterior, el servidor, y el servidor del item
+            anterior el cliente.\\
+\end{itemize}
+
+Para ejecutar, se debe levantar el \texttt{jade.Boot}, esto se puede hacer
+mediante el comando \texttt{make}
+
+Simplemente se puede ejecutar \texttt{make start-gui}
+
+Luego, para interactuar con el servidor, se cuenta con el script \texttt{run}
+
+Para ver la sección de ayuda del comando, se puede utilizar la flag \texttt{-h}
+
+\subsection{Comparación con prácticas anteriores}
+
+Esta solución, plantea más comodidad al momento de manejar los datos
+(se cuenta con una clase con atributos accesibles tanto en el cliente,
+como en el servidor). Aunque veo que el migrado de código en repetidas
+ocaciones puede llegar a generar un overhead mayor.
 
 \end{document}
