@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZdl{} make
+\PYGZdl{} make start \PYG{p}{\PYGZam{}}
+\PYGZdl{} make run\PYGZhy{}ftp \PYG{c+c1}{\PYGZsh{} imprime ayuda}
+\PYGZdl{} ./FTP/run ... \PYG{c+c1}{\PYGZsh{} en la ayuda se muestra como utilizar el comando}
+\end{Verbatim}

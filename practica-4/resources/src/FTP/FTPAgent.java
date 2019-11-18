@@ -106,7 +106,7 @@ public class FTPAgent extends Agent
         private byte[] read(String path, int position)
         {
                 try {
-                        int chunck = 2000;
+                        int chunck = 1024;
                         int noBytes = ((int) this.fileSize - this.actualSize) < chunck ? (int) (this.fileSize - this.actualSize) : chunck;
                         System.out.printf("Reading %d bytes from %d\n", noBytes, this.actualSize);
                         InputStream in = new FileInputStream(path);

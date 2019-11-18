@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZdl{} make
+\PYGZdl{} make start \PYG{p}{\PYGZam{}}
+\PYGZdl{} make run\PYGZhy{}sum
+\end{Verbatim}
