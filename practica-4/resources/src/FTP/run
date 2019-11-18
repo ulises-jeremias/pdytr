@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+has_param() {
+    local term="$1"
+    shift
+    for arg; do
+        if [[ $arg == "$term" ]]
+        then
+            return 0
+        fi
+    done
+    return 1
+}
+
+. ./lib/flags/declares.sh
+
+variables["-s"]="source"
+variables["-o"]="output"
+
+. ./lib/flags/arguments.sh
+
+source=${source:-"tmp1"}
+output=${output:-"tmp1"}
+
+valid=false
+
+for method in list write read
+do
+    if [[ "$1" == "$method" ]]
+    then
+        valid=true
+        break
+    fi
+done
+
+if ! $valid || has_param '--help' "$@" || has_param '-h' "$@"
+then
+    cat <<-HELP
+
+USAGE $0:
+
+$0 read [OPTIONS]
+$0 write [OPTIONS]
+$0 list <directory>
+    
+OPTIONS:
+    -o <output/file/path>
+    -s <input/file/path>
+HELP
+  exit 0
+fi
+
+echo "Source file: $source - output: $output"
+
+if [ $# -eq 2 -a "$1" == "list" ]
+then
+    java -cp ./lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$2)"
+else
+    p1=$output
+    p2=$source
+
+    if [[ "$1" == "write" ]]
+    then
+        p1=$source
+        p2=$output
+    fi
+    
+    java -cp ./lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$p2,$p3)"
+fi

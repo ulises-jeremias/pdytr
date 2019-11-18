@@ -15,6 +15,9 @@ run-info:
 run-sum:
 	cd Sum && java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents mol:SumAgent
 
+run-ftp:
+	./FTP/run --help
+
 clean:
 	- rm -rf APDescription.txt MTPs-Main-Container.txt
 	- $(foreach dir, $(dirs), rm -rf $(dir)/classes;)

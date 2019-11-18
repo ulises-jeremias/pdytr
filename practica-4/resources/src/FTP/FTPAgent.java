@@ -162,7 +162,7 @@ public class FTPAgent extends Agent
                         case "write":
                         case "read":
                                 if (args.length != 3) {
-                                        System.out.println("3 argument needed: command , local directory and remote directory");
+                                        System.out.println("3 argument needed: command, local directory and remote directory");
                                         System.exit(1);
                                 } else {
                                         this.action          = (String) args[0];
