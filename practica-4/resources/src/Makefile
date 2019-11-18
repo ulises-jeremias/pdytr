@@ -1,17 +1,20 @@
-all: clean
-	mkdir ex1/classes ex2/classes ex3/classes
-	javac -classpath lib/jade.jar -d ex1/classes ex1/Agent1.java
-	javac -classpath lib/jade.jar -d ex2/classes ex2/Agent2.java
-	javac -classpath lib/jade.jar -d ex3/classes ex3/Agent3.java
+dirs := Info Sum FTP
 
-start-gui:
+all: clean build
+
+build:
+	$(foreach dir, $(dirs), mkdir $(dir)/classes;)
+	$(foreach dir, $(dirs), javac -classpath lib/jade.jar -d $(dir)/classes $(dir)/$(dir)Agent.java;)
+
+start:
 	java -cp lib/jade.jar:classes jade.Boot -gui
 
-run-ex1:
-	cd ex1 && java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents mol:Agent1
+run-info:
+	cd Info && java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents mol:InfoAgent
 
-run-ex2:
-	cd ex2 && java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents mol:Agent2
+run-sum:
+	cd Sum && java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents mol:SumAgent
 
 clean:
-	- rm -r APDescription.txt MTPs-Main-Container.txt ex1/classes ex2/classes ex3/classes
+	- rm -rf APDescription.txt MTPs-Main-Container.txt
+	- $(foreach dir, $(dirs), rm -rf $(dir)/classes;)

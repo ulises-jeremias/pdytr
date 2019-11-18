@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.nio.file.Paths;
 
-public class Agent2 extends Agent
+public class SumAgent extends Agent
 {
         private final String machine = "Main-Container";
         private Location origin = null;

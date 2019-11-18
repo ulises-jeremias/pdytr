@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 
-public class Agent3 extends Agent
+public class FTPAgent extends Agent
 {
         private String action;
         private String sourcePath;

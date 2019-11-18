@@ -4,13 +4,13 @@ import jade.wrapper.ContainerController;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Agent1 extends Agent
+public class InfoAgent extends Agent
 {
+	private ArrayList<ContainerInfo> info = new ArrayList<ContainerInfo>();
+	private ArrayList<String> containers = new ArrayList<String>();
 	private Location origin;
 	private long startTime;
-	private ArrayList<String> containers = new ArrayList<String>();
 	private int index;
-	private ArrayList<ContainerInfo> info = new ArrayList<ContainerInfo>();
 	
 	public void printAgentPresentation() {
 		System.out.println("Hi agent with local name: " + getLocalName());
