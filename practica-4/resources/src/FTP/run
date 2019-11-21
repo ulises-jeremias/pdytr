@@ -12,12 +12,12 @@ has_param() {
     return 1
 }
 
-. ./lib/flags/declares.sh
+. ../lib/flags/declares.sh
 
 variables["-s"]="source"
 variables["-o"]="output"
 
-. ./lib/flags/arguments.sh
+. ../lib/flags/arguments.sh
 
 source=${source:-"tmp1"}
 output=${output:-"tmp1"}
@@ -54,16 +54,10 @@ echo "Source file: $source - output: $output"
 
 if [ $# -eq 2 -a "$1" == "list" ]
 then
-    java -cp ./lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$2)"
+    java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$2)"
 else
-    p1=$output
-    p2=$source
+    p1=$source
+    p2=$output
 
-    if [[ "$1" == "write" ]]
-    then
-        p1=$source
-        p2=$output
-    fi
-    
-    java -cp ./lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$p2,$p3)"
+    java -cp ../lib/jade.jar:classes jade.Boot -gui -container -host localhost -agents "mol:FTPAgent($1,$p1,$p2)"
 fi
