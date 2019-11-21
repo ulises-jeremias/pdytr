@@ -11,6 +11,7 @@ public class SumAgent extends Agent
         private final String machine = "Main-Container";
         private Location origin = null;
         private Integer sum;
+        private String filePath = "/tmp/file";
 
         public void printAgentPresentation() {
                 System.out.println("Hi agent with local name: " + getLocalName());
@@ -19,6 +20,9 @@ public class SumAgent extends Agent
 
         public void setup()
         {
+                Object[] args = getArguments();
+                this.getopt(args);
+
                 this.origin = here();
                 this.printAgentPresentation();
 		System.out.println("in location: " + this.origin.getID());
@@ -39,7 +43,7 @@ public class SumAgent extends Agent
 
                 if (!actual.getName().equals(this.origin.getName())) {
                         try {
-                                List<String> numbers = Files.readAllLines(Paths.get("/tmp/file"), Charset.forName("utf8"));
+                                List<String> numbers = Files.readAllLines(Paths.get(this.filePath), Charset.forName("utf8"));
                                 int result = 0;
                                 
                                 for (String number: numbers) {
@@ -60,6 +64,16 @@ public class SumAgent extends Agent
                         doMove(destination);
                 } else {
                         System.out.printf("Sum: %d\n", this.sum);
+                }
+        }
+
+        private void getopt(Object[] args) {
+                try {
+                        if (args.length != 0) {
+                                this.filePath = (String) args[0];           
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
                 }
         }
 }
