@@ -3,6 +3,8 @@ import jade.util.leap.Serializable;
 import jade.wrapper.ContainerController;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.lang.management.ManagementFactory;
+import com.sun.management.OperatingSystemMXBean;
 
 public class InfoAgent extends Agent
 {
@@ -66,9 +68,15 @@ public class InfoAgent extends Agent
 		try {
 			ContainerID destination = new ContainerID(containers.get(index++), null);
 			System.out.println("Migratin agent to " + destination.getID());
+			
 			info.add(currentContainerInfo);
+			
 			long finishContainerTime = System.currentTimeMillis() - startContainerTime;
 			currentContainerInfo.setProcessingTime(finishContainerTime);
+
+			OperatingSystemMXBean processing = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+			currentContainerInfo.setProcessLoad(processing.getProcessCpuLoad());
+
 			doMove(destination);
 		} catch (Exception e) {
 			System.out.println("Error: It was not posible to migrate the agent!");
@@ -97,6 +105,7 @@ public class InfoAgent extends Agent
 		private long freeMemory;
 		private String name;
 		private long processingTime;
+		private double processLoad;
 
 		public long getFreeMemory() {
 			return freeMemory;
@@ -121,15 +130,22 @@ public class InfoAgent extends Agent
 		public void setProcessingTime(long processingTime) {
 			this.processingTime = processingTime;
 		}
+
+		public void setProcessLoad(double processLoad){
+			this.processLoad = processLoad;
+		}
+
+		public double getProcessLoad() {
+			return processLoad;
+		}
                 
 		public String getInfoAsString() {
-			float processingPercentage = (getProcessingTime() * 100) / (System.currentTimeMillis() - startTime);
 			String str = "";
 
 			str += "Container " + getName() + " information:";
 			str += "\n\tFree memory: " + (getFreeMemory() / 1024) / 1024 + "Mb";
 			str += "\n\tProcessing time: " + getProcessingTime() + "ms";
-			str += "\n\tProcessing load: " + processingPercentage + "%";
+			str += "\n\tProcessing load: " + processLoad + "%";
                         
 			return str;
 		}
